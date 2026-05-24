@@ -1,4 +1,8 @@
-```
-# CI/CD
-.github/workflows/
+```gitignore
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Test cache
+.pytest_cache/
 ```
