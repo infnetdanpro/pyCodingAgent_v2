@@ -1,42 +1,4 @@
 ```
-# Test cache and temporary files
-.pytest_cache/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Coverage reports
-.coverage
-htmlcov/
-coverage/
-
-# Environment variables
-.env
-.env.local
-*.env.*
-
-# Logs
-*.log
-
-# IDE specific
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# OS specific
-.DS_Store
-Thumbs.db
-
-# Dependencies and build artifacts
-venv/
-.venv/
-__pycache__/
-dist/
-build/
-target/
-.gradle/
-.mypy_cache/
+# CI/CD
+.github/workflows/
 ```
