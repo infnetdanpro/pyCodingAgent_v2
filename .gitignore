@@ -1,1 +1,32 @@
-Nothing should be ignored in this case, as the changes only include source code files (.py) and test files (.py), which are not build artifacts, dependencies, or temporary files.
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.*
+.venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+coverage/
+htmlcov/
+.nocover
+.coverage.*
+.pytest_cache/
+.hypothesis/
+
+# Testing
+.tests/
+test/
+tests/
+
+# History
+.agent_history/
+```
