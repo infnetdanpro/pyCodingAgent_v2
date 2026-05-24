@@ -26,6 +26,20 @@ from .browser import (
     BrowserEvaluateTool,
     BrowserCloseTool,
 )
+from .messaging import (
+    MessagingClient,
+    TaskMessage,
+    SlackClient,
+    TelegramClient,
+    JiraClient,
+    SlackReceiveTool,
+    SlackSendTool,
+    TelegramReceiveTool,
+    TelegramSendTool,
+    JiraReceiveTool,
+    JiraCreateTool,
+    AnalyzeTasksTool,
+)
 
 __all__ = [
     "Tool",
@@ -35,6 +49,11 @@ __all__ = [
     "ShellTools",
     "ProcessTools",
     "BrowserTools",
+    "MessagingClient",
+    "TaskMessage",
+    "SlackClient",
+    "TelegramClient",
+    "JiraClient",
     "ReadFileTool",
     "WriteFileTool",
     "ListDirTool",
@@ -52,4 +71,11 @@ __all__ = [
     "BrowserGetContentTool",
     "BrowserEvaluateTool",
     "BrowserCloseTool",
+    "SlackReceiveTool",
+    "SlackSendTool",
+    "TelegramReceiveTool",
+    "TelegramSendTool",
+    "JiraReceiveTool",
+    "JiraCreateTool",
+    "AnalyzeTasksTool",
 ]
