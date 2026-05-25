@@ -66,15 +66,15 @@ def cmd_init(args: argparse.Namespace) -> int:
     # Create .agent_config.json if it doesn't exist
     config_file = target_dir / ".agent_config.json"
     if not config_file.exists():
+        import json
         config_content = {
             "workspace_dir": str(target_dir),
             "model": {
-                "base_url": "http://localhost:11434/v1",
-                "api_key": "ollama",
-                "model_name": "qwen2.5-coder:7b"
+                "base_url": os.getenv("LLM_BASE_URL", "http://localhost:11434/v1"),
+                "api_key": os.getenv("LLM_API_KEY", "ollama"),
+                "model_name": os.getenv("LLM_MODEL", "qwen2.5-coder:7b")
             }
         }
-        import json
         with open(config_file, 'w') as f:
             json.dump(config_content, f, indent=2)
         print(f"Created configuration file: {config_file}")
@@ -282,7 +282,7 @@ def main() -> int:
     chat_parser.add_argument(
         "--model",
         default=os.getenv("LLM_MODEL", "qwen2.5-coder:7b"),
-        help="LLM model name (default: qwen2.5-coder:7b)",
+        help="LLM model name (default: from .env or qwen2.5-coder:7b)",
     )
     chat_parser.add_argument(
         "--log-level",
@@ -319,7 +319,7 @@ def main() -> int:
     run_parser.add_argument(
         "--model",
         default=os.getenv("LLM_MODEL", "qwen2.5-coder:7b"),
-        help="LLM model name (default: qwen2.5-coder:7b)",
+        help="LLM model name (default: from .env or qwen2.5-coder:7b)",
     )
     run_parser.add_argument(
         "--log-level",
