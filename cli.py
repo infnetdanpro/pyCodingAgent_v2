@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from coding_agent.config import ModelConfig, Settings
-from coding_agent.core import CodingAgent
+from coding_agent.core import CodingAgent, PlanMode
 from coding_agent.tools import (
     ListDirTool,
     ReadFileTool,
@@ -16,7 +16,7 @@ from coding_agent.tools import (
     SearchFilesTool,
     WriteFileTool,
 )
-from coding_agent.utils import setup_logging
+from coding_agent.utils import setup_logging, interactive_plan_selector
 
 
 def create_agent(workspace_dir: str, model_config: ModelConfig) -> CodingAgent:
@@ -131,6 +131,8 @@ def cmd_chat(args: argparse.Namespace) -> int:
     
     try:
         with create_agent(str(workspace_dir), model_config) as agent:
+            plan_mode = PlanMode(model_config)
+            
             print("=" * 60)
             print("Coding Agent CLI")
             print("=" * 60)
@@ -142,6 +144,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
             print("  /help     - Show available commands")
             print("  /clear    - Clear conversation history")
             print("  /tools    - List available tools")
+            print("  /plan     - Generate a plan for your request")
             print("  /quit     - Exit the agent")
             print("\nEnter your request:\n")
             
@@ -164,6 +167,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
                         print("  /help     - Show this help message")
                         print("  /clear    - Clear conversation history")
                         print("  /tools    - List available tools")
+                        print("  /plan     - Generate and review a plan")
                         print("  /quit     - Exit the agent")
                         print("  <text>    - Send a message to the agent\n")
                     
@@ -176,6 +180,64 @@ def cmd_chat(args: argparse.Namespace) -> int:
                         for tool_name in agent.tool_registry.list_tools():
                             print(f"  - {tool_name}")
                         print()
+                    
+                    elif command == "/plan":
+                        # Plan mode workflow
+                        plan_request = user_input[6:].strip()
+                        if not plan_request:
+                            print("Usage: /plan <your request>")
+                            print("Example: /plan Create a Python script that lists all files in the current directory\n")
+                            continue
+                        
+                        print("\nGenerating plan...")
+                        
+                        # Get system prompt and available tools
+                        context = agent.get_context()
+                        system_prompt = context.system_prompt or "You are a helpful coding assistant."
+                        available_tools = agent.tool_registry.get_all_schemas()
+                        
+                        # Generate plan
+                        plan = plan_mode.generate_plan(plan_request, system_prompt, available_tools)
+                        
+                        if plan:
+                            print(f"\n{plan}")
+                            
+                            # Convert plan items to format expected by selector
+                            plan_items = []
+                            for item in plan.items:
+                                plan_items.append({
+                                    'description': item.description,
+                                    'tool_name': item.tool_name,
+                                    'enabled': True
+                                })
+                            
+                            # Let user review and modify plan
+                            confirmed, enabled_items = interactive_plan_selector(plan_items)
+                            
+                            if confirmed and enabled_items:
+                                print(f"\nExecuting {len(enabled_items)} selected plan items...\n")
+                                
+                                # Build execution request from enabled items
+                                execution_request = f"Execute the following plan steps:\n\n"
+                                for i, item in enumerate(enabled_items, 1):
+                                    execution_request += f"{i}. {item['description']}"
+                                    if item.get('tool_name'):
+                                        execution_request += f" [using {item['tool_name']}]"
+                                    execution_request += "\n"
+                                
+                                execution_request += "\nPlease execute these steps in order."
+                                
+                                try:
+                                    response = agent.run(execution_request)
+                                    print("\n" + response + "\n")
+                                except Exception as e:
+                                    print(f"\nError during execution: {e}\n")
+                            elif confirmed:
+                                print("\nNo items selected for execution.\n")
+                            else:
+                                print("\nPlan execution cancelled.\n")
+                        else:
+                            print("Failed to generate plan.\n")
                     
                     else:
                         print(f"Unknown command: {command}. Type /help for available commands.\n")
