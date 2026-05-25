@@ -234,13 +234,22 @@ class LLMClient:
         tool_calls = []
         for i, match in enumerate(matches):
             try:
-                # First try to parse as-is
-                data = json.loads(match.strip())
+                # Pre-process the JSON string to handle common issues
+                cleaned = match.strip()
+                
+                # Replace literal newlines/tabs with escaped versions for valid JSON
+                # This handles cases where model outputs raw control characters
+                cleaned = cleaned.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+                
+                # First try to parse the cleaned version
+                data = json.loads(cleaned)
                 
                 # If that fails due to escaped quotes, try unescaping
                 if not isinstance(data, dict) or "name" not in data:
                     # Unescape escaped quotes in the JSON string
                     unescaped = match.replace('\\"', '"')
+                    # Also clean control characters in unescaped version
+                    unescaped = unescaped.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
                     data = json.loads(unescaped.strip())
                 
                 if "name" in data and "arguments" in data:
