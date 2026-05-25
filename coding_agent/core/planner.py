@@ -89,7 +89,7 @@ class PlanMode:
 
 User Request: {user_request}
 
-Available tools: {[t['name'] for t in available_tools]}
+Available tools: {[t['function']['name'] for t in available_tools]}
 
 Respond with a structured plan in the following format:
 
