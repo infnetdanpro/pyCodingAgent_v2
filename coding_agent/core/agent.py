@@ -74,6 +74,12 @@ Guidelines:
 - Prefer reading existing files before modifying them
 - Test changes when appropriate
 
+Tool Usage Instructions:
+- When you need to perform an action, you MUST use the tool_calls format in your response
+- Do NOT write tool calls as JSON text in your message content
+- The system will automatically parse your tool calls and execute them
+- After tools execute, you will see their results and can continue
+
 Available tools allow you to:
 - Read and write files
 - List directory contents
@@ -110,21 +116,24 @@ Always explain what you're doing and why."""
                 logger.error(f"LLM request failed: {e}")
                 return f"Error: Failed to communicate with LLM - {e}"
 
+            # Execute tool calls if present
+            if tool_calls:
+                for tool_call in tool_calls:
+                    result = self._execute_tool_call(tool_call)
+                    self._context.add_tool_result(tool_call.id, result.output)
+
+                    if not result.success:
+                        logger.warning(f"Tool execution failed: {result.error}")
+                
+                # Continue the loop to let LLM process tool results
+                continue
+
+            # No tool calls, we're done
             if content:
                 self._context.add_assistant_message(content)
-
-            if not tool_calls:
-                # No tool calls, we're done
-                self._context._save_history()
-                return content
-
-            # Execute tool calls
-            for tool_call in tool_calls:
-                result = self._execute_tool_call(tool_call)
-                self._context.add_tool_result(tool_call.id, result.output)
-
-                if not result.success:
-                    logger.warning(f"Tool execution failed: {result.error}")
+            
+            self._context._save_history()
+            return content
 
         logger.warning("Max iterations reached")
         return "I've reached the maximum number of iterations. Let me summarize what I've accomplished..."
