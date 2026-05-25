@@ -191,11 +191,14 @@ class LLMClient:
         Returns:
             List of ToolCall objects if found, None otherwise.
         """
+        # Preprocess content to handle common issues from model output
+        content = self._preprocess_json_content(content)
+        
         # Try multiple patterns to extract JSON tool calls from various formats
         
         # Pattern 1: JSON in markdown code blocks (with optional language tag like json, result, etc.)
         # Handles: ```json {...} ``` or ```result {...} ``` or just ``` {...} ```
-        code_block_pattern = r'```\s*(?:\w+)?\s*(\{[^`]*?"name"\s*:\s*"[^"]+"\s*,\s*"arguments"[^`]*?\})\s*```'
+        code_block_pattern = r'```\s*(?:\w+)?\s*(\{.*?"name"\s*:\s*".*?"\s*,\s*"arguments".*?\})\s*```'
         matches = re.findall(code_block_pattern, content, re.DOTALL)
         
         # Pattern 2: Standalone JSON objects with name/arguments fields
@@ -237,20 +240,7 @@ class LLMClient:
                 # Pre-process the JSON string to handle common issues
                 cleaned = match.strip()
                 
-                # Replace literal newlines/tabs with escaped versions for valid JSON
-                # This handles cases where model outputs raw control characters
-                cleaned = cleaned.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
-                
-                # First try to parse the cleaned version
                 data = json.loads(cleaned)
-                
-                # If that fails due to escaped quotes, try unescaping
-                if not isinstance(data, dict) or "name" not in data:
-                    # Unescape escaped quotes in the JSON string
-                    unescaped = match.replace('\\"', '"')
-                    # Also clean control characters in unescaped version
-                    unescaped = unescaped.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
-                    data = json.loads(unescaped.strip())
                 
                 if "name" in data and "arguments" in data:
                     # Generate a unique ID for each tool call
@@ -272,3 +262,49 @@ class LLMClient:
                 continue
         
         return tool_calls if tool_calls else None
+    
+    def _preprocess_json_content(self, content: str) -> str:
+        """Preprocess content to fix common JSON formatting issues from model output.
+        
+        Models sometimes output invalid JSON with:
+        - Python-style triple quotes for multi-line strings
+        - Unescaped newlines inside string values
+        
+        Args:
+            content: Raw content that may contain malformed JSON.
+            
+        Returns:
+            Content with fixed JSON formatting.
+        """
+        # Replace triple double quotes with single double quotes
+        content = content.replace('"""', '"')
+        
+        # Replace triple single quotes with single double quotes  
+        content = content.replace("'''", '"')
+        
+        # Escape unescaped newlines/tabs/carriage returns inside string values
+        # This is a character-by-character approach to track when we're inside a string
+        result = []
+        in_string = False
+        i = 0
+        while i < len(content):
+            char = content[i]
+            
+            # Toggle string state when encountering unescaped quote
+            if char == '"' and (i == 0 or content[i-1] != '\\'):
+                in_string = not in_string
+                result.append(char)
+            elif in_string and char == '\n':
+                # Escape newline inside string
+                result.append('\\n')
+            elif in_string and char == '\r':
+                # Escape carriage return inside string  
+                result.append('\\r')
+            elif in_string and char == '\t':
+                # Escape tab inside string
+                result.append('\\t')
+            else:
+                result.append(char)
+            i += 1
+        
+        return ''.join(result)
