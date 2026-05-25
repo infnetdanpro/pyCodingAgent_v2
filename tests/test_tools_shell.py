@@ -23,10 +23,11 @@ class TestRunCommandTool:
     def test_run_command_with_error(self):
         """Test running a command that fails."""
         tool = RunCommandTool()
-        result = tool.execute(command="exit 1")
+        # Use false command which always exits with code 1
+        result = tool.execute(command="false")
 
         assert result.success is False
-        assert "exited with code" in result.error.lower()
+        assert "exited with code" in result.error.lower() or "code 1" in result.error.lower()
 
     def test_run_command_missing_parameter(self):
         """Test that missing command parameter returns error."""

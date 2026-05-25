@@ -46,7 +46,7 @@ class RunCommandTool(Tool):
         return (
             "Execute a shell command in the workspace directory. "
             "Use for running tests, building projects, or system operations. "
-            "Commands run with shell=True, use caution."
+            "Commands are executed safely without shell injection vulnerabilities."
         )
 
     @property
@@ -83,9 +83,16 @@ class RunCommandTool(Tool):
             if not command:
                 return ToolResult(success=False, error="Missing required parameter: command")
 
+            # Split command into arguments to avoid shell injection
+            import shlex
+            try:
+                command_args = shlex.split(command)
+            except ValueError:
+                return ToolResult(success=False, error="Invalid command syntax")
+
             result = subprocess.run(
-                command,
-                shell=True,
+                command_args,
+                shell=False,
                 cwd=self._shell_tools.workspace_root,
                 capture_output=True,
                 text=True,
@@ -167,13 +174,10 @@ class RunPythonTool(Tool):
             if not code:
                 return ToolResult(success=False, error="Missing required parameter: code")
 
-            # Escape single quotes for shell safety
-            escaped_code = code.replace("'", "'\"'\"'")
-            command = f"python3 -c '{escaped_code}'"
-
+            # Execute Python directly without shell for security
             result = subprocess.run(
-                command,
-                shell=True,
+                ["python3", "-c", code],
+                shell=False,
                 cwd=self._shell_tools.workspace_root,
                 capture_output=True,
                 text=True,

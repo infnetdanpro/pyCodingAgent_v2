@@ -72,9 +72,53 @@ class CalculateTool(Tool):
             if not expression:
                 return ToolResult(success=False, error="Missing expression parameter")
 
-            # Safe evaluation using eval with restricted builtins
-            allowed_names = {"__builtins__": {}}
-            result = eval(expression, allowed_names, {})
+            # Safe evaluation using ast.literal_eval instead of eval
+            import ast
+            try:
+                result = ast.literal_eval(expression)
+            except (ValueError, SyntaxError):
+                # If literal_eval fails, try safe math evaluation
+                import operator
+                allowed_operators = {
+                    ast.Add: operator.add,
+                    ast.Sub: operator.sub,
+                    ast.Mult: operator.mul,
+                    ast.Div: operator.truediv,
+                    ast.FloorDiv: operator.floordiv,
+                    ast.Mod: operator.mod,
+                    ast.Pow: operator.pow,
+                    ast.USub: operator.neg,
+                    ast.UAdd: operator.pos,
+                }
+                
+                def eval_math(node):
+                    if isinstance(node, ast.Expression):
+                        return eval_math(node.body)
+                    elif isinstance(node, ast.Num):  # Python < 3.8
+                        return node.n
+                    elif isinstance(node, ast.Constant):  # Python >= 3.8
+                        return node.value
+                    elif isinstance(node, ast.BinOp):
+                        left = eval_math(node.left)
+                        right = eval_math(node.right)
+                        op_type = type(node.op)
+                        if op_type in allowed_operators:
+                            return allowed_operators[op_type](left, right)
+                        else:
+                            raise ValueError(f"Unsupported operator: {op_type}")
+                    elif isinstance(node, ast.UnaryOp):
+                        operand = eval_math(node.operand)
+                        op_type = type(node.op)
+                        if op_type in allowed_operators:
+                            return allowed_operators[op_type](operand)
+                        else:
+                            raise ValueError(f"Unsupported unary operator: {op_type}")
+                    else:
+                        raise ValueError(f"Unsupported expression type: {type(node)}")
+                
+                tree = ast.parse(expression, mode='eval')
+                result = eval_math(tree)
+            
             return ToolResult(success=True, output=str(result))
 
         except Exception as e:
