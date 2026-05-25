@@ -191,16 +191,42 @@ class LLMClient:
         Returns:
             List of ToolCall objects if found, None otherwise.
         """
-        # First try to extract JSON from markdown code blocks
-        code_block_pattern = r'```(?:\s*json)?\s*(\{.*?\})\s*```'
+        # Try multiple patterns to extract JSON tool calls from various formats
+        
+        # Pattern 1: JSON in markdown code blocks (with optional language tag like json, result, etc.)
+        # Handles: ```json {...} ``` or ```result {...} ``` or just ``` {...} ```
+        code_block_pattern = r'```\s*(?:\w+)?\s*(\{[^`]*?"name"\s*:\s*"[^"]+"\s*,\s*"arguments"[^`]*?\})\s*```'
         matches = re.findall(code_block_pattern, content, re.DOTALL)
         
-        # If no code blocks found, try to find standalone JSON objects with name/arguments
+        # Pattern 2: Standalone JSON objects with name/arguments fields
+        # Use balanced brace matching for nested objects
         if not matches:
-            # Look for JSON-like structures that contain both "name" and "arguments"
-            # Use non-greedy .* to match nested braces properly
-            json_pattern = r'\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:.*\}'
+            json_pattern = r'\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*\}'
             matches = re.findall(json_pattern, content, re.DOTALL)
+        
+        # Pattern 3: More flexible JSON extraction - find all { } blocks and filter
+        if not matches:
+            # Find potential JSON blocks by looking for opening braces
+            brace_start = -1
+            brace_count = 0
+            potential_matches = []
+            
+            for i, char in enumerate(content):
+                if char == '{':
+                    if brace_count == 0:
+                        brace_start = i
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0 and brace_start != -1:
+                        potential_json = content[brace_start:i+1]
+                        potential_matches.append(potential_json)
+                        brace_start = -1
+            
+            # Filter to only those that look like tool calls
+            for candidate in potential_matches:
+                if '"name"' in candidate and '"arguments"' in candidate:
+                    matches.append(candidate)
         
         if not matches:
             return None
@@ -208,7 +234,15 @@ class LLMClient:
         tool_calls = []
         for i, match in enumerate(matches):
             try:
+                # First try to parse as-is
                 data = json.loads(match.strip())
+                
+                # If that fails due to escaped quotes, try unescaping
+                if not isinstance(data, dict) or "name" not in data:
+                    # Unescape escaped quotes in the JSON string
+                    unescaped = match.replace('\\"', '"')
+                    data = json.loads(unescaped.strip())
+                
                 if "name" in data and "arguments" in data:
                     # Generate a unique ID for each tool call
                     tool_call_id = f"call_{i}_{data['name']}"
