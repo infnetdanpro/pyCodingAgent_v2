@@ -83,10 +83,17 @@ class StartProcessTool(Tool):
             if not command:
                 return ToolResult(success=False, error="Missing required parameter: command")
 
-            # Start process in background
+            # Split command into arguments to avoid shell injection
+            import shlex
+            try:
+                command_args = shlex.split(command)
+            except ValueError:
+                return ToolResult(success=False, error="Invalid command syntax")
+
+            # Start process in background without shell=True for security
             process = subprocess.Popen(
-                command,
-                shell=True,
+                command_args,
+                shell=False,
                 cwd=str(self._process_tools.workspace_root),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

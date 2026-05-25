@@ -110,8 +110,9 @@ class ConversationContext:
                 "system_prompt": self.system_prompt,
             }
             self.history_file.write_text(json.dumps(data, indent=2))
-        except Exception:
-            pass  # Silently fail on save errors
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to save conversation history: {e}")
 
     def _load_history(self) -> None:
         """Load conversation history from file."""
@@ -122,8 +123,9 @@ class ConversationContext:
             data = json.loads(self.history_file.read_text())
             self.messages = [Message.from_dict(m) for m in data.get("messages", [])]
             self._trim_if_needed()
-        except Exception:
-            pass  # Silently fail on load errors
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to load conversation history: {e}")
 
     def token_estimate(self) -> int:
         """Estimate token count for current context.
