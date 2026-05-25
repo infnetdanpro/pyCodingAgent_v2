@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 from typing import Any, Generator, Optional
 
 import httpx
@@ -159,6 +160,7 @@ class LLMClient:
         content = message.get("content", "") or ""
         tool_calls = None
 
+        # First check for native tool_calls format (OpenAI standard)
         if "tool_calls" in message and message["tool_calls"]:
             tool_calls = [
                 ToolCall(
@@ -168,5 +170,62 @@ class LLMClient:
                 )
                 for tc in message["tool_calls"]
             ]
+        # Fallback: Parse tool calls from content for models that don't support native tool calling
+        # This handles cases where the model outputs JSON tool calls in markdown code blocks
+        elif content:
+            parsed_tool_calls = self._parse_tool_calls_from_content(content)
+            if parsed_tool_calls:
+                tool_calls = parsed_tool_calls
 
         return content, tool_calls
+
+    def _parse_tool_calls_from_content(self, content: str) -> Optional[list[ToolCall]]:
+        """Parse tool calls from message content.
+
+        Some models (like smaller Qwen variants) may output tool calls as JSON
+        in their content instead of using the native tool_calls format.
+
+        Args:
+            content: Message content that may contain tool call JSON.
+
+        Returns:
+            List of ToolCall objects if found, None otherwise.
+        """
+        # First try to extract JSON from markdown code blocks
+        code_block_pattern = r'```(?:\s*json)?\s*(\{.*?\})\s*```'
+        matches = re.findall(code_block_pattern, content, re.DOTALL)
+        
+        # If no code blocks found, try to find standalone JSON objects with name/arguments
+        if not matches:
+            # Look for JSON-like structures that contain both "name" and "arguments"
+            # Use non-greedy .* to match nested braces properly
+            json_pattern = r'\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:.*\}'
+            matches = re.findall(json_pattern, content, re.DOTALL)
+        
+        if not matches:
+            return None
+        
+        tool_calls = []
+        for i, match in enumerate(matches):
+            try:
+                data = json.loads(match.strip())
+                if "name" in data and "arguments" in data:
+                    # Generate a unique ID for each tool call
+                    tool_call_id = f"call_{i}_{data['name']}"
+                    
+                    # Arguments might already be a dict or might need parsing
+                    arguments = data["arguments"]
+                    if isinstance(arguments, dict):
+                        arguments = json.dumps(arguments)
+                    
+                    tool_calls.append(
+                        ToolCall(
+                            id=tool_call_id,
+                            name=data["name"],
+                            arguments=arguments,
+                        )
+                    )
+            except json.JSONDecodeError:
+                continue
+        
+        return tool_calls if tool_calls else None

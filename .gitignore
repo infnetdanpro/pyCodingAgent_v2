@@ -25,15 +25,7 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
-coverage/
-
-# Environment
-.env
-.env.local
-.env.*
-.venv/
-venv/
-ENV/
+.coverage.*
 
 # IDE
 .vscode/
@@ -41,6 +33,11 @@ ENV/
 *.swp
 *.swo
 *.tmp
+
+# Environment
+.env
+.env.local
+*.env.*
 
 # OS
 .DS_Store
