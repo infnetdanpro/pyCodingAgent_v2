@@ -111,20 +111,32 @@ Built with clean architecture principles, the coding agent follows the **ReAct p
 - **Python 3.10+** recommended
 - **Local LLM** (optional but recommended for offline use)
 
-### Step 1: Install Dependencies
+### Step 1: Install from GitHub
 
 ```bash
-cd /workspace
-pip install httpx
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install directly from GitHub repository
+pip install git+https://github.com/yourusername/coding-agent.git
 ```
 
-For development with additional tools:
+### Step 2: Initialize Your Project Directory
 
 ```bash
-pip install -r coding_agent/requirements.txt
+# Initialize current directory
+agent init
+
+# Or initialize a specific directory
+agent init /path/to/your/project
 ```
 
-### Step 2: Setup Local LLM (Recommended)
+This creates:
+- `.agent_config.json` - Configuration file for the agent
+- `.gitignore` - Pre-configured to ignore agent history and cache files
+
+### Step 3: Setup Local LLM (Recommended)
 
 Install [Ollama](https://ollama.ai/) for local model inference:
 
@@ -143,6 +155,64 @@ Alternative models you can use:
 - `codellama:7b` - General purpose coding model
 - `deepseek-coder:6.7b` - Specialized for code generation
 - `starcoder2:7b` - Multi-language code model
+
+---
+
+## 💻 CLI Usage
+
+The coding agent provides a command-line interface for easy interaction.
+
+### Initialize a Project
+
+```bash
+# Initialize current directory
+agent init
+
+# Initialize a specific directory
+agent init /path/to/project
+```
+
+### Start Interactive Chat
+
+```bash
+# Start chat in current directory
+agent chat
+
+# Specify workspace directory
+agent chat -w /path/to/project
+
+# Use custom model configuration
+agent chat --model codellama:7b --base-url http://localhost:11434/v1
+```
+
+### Run Single Command
+
+```bash
+# Execute a single task
+agent run "List all Python files in the current directory"
+
+# With custom workspace
+agent run "Create a README.md file" -w /path/to/project
+```
+
+### CLI Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `agent init [dir]` | Initialize a directory for use with the agent |
+| `agent chat` | Start interactive chat session |
+| `agent run "command"` | Execute a single command |
+
+### In-Chat Commands
+
+When using `agent chat`, you can use these special commands:
+
+| Command | Description |
+|---------|-------------|
+| `/help` | Show available commands |
+| `/clear` | Clear conversation history |
+| `/tools` | List available tools |
+| `/quit` | Exit the chat session |
 
 ---
 

@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coding-agent"
+version = "0.1.0"
+description = "A modular and scalable coding agent architecture designed for on-device execution with local LLM models"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Coding Agent Team"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["agent", "llm", "coding", "ai", "automation"]
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "mypy>=1.8.0",
+    "ruff>=0.3.0",
+]
+
+[project.scripts]
+agent = "coding_agent.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/coding-agent"
+Documentation = "https://github.com/yourusername/coding-agent#readme"
+Repository = "https://github.com/yourusername/coding-agent.git"
+Issues = "https://github.com/yourusername/coding-agent/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["coding_agent*"]
+
+[tool.setuptools.package-data]
+coding_agent = ["py.typed"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
