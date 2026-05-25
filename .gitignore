@@ -1,9 +1,9 @@
-```gitignore
+```
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
 build/
 develop-eggs/
@@ -20,6 +20,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+
+# IDE
+.vscode/
+.idea/
 
 # Environment
 .env
@@ -29,18 +34,9 @@ wheels/
 venv/
 ENV/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
 # Logs
 *.log
 
-# Coverage
-.coverage
-coverage/
-htmlcov/
+# History
+.agent_history/
 ```
