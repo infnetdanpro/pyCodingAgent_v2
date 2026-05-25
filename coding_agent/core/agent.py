@@ -87,7 +87,33 @@ Available tools allow you to:
 - Execute shell commands
 - Run Python code snippets
 
-Always explain what you're doing and why."""
+Always explain what you're doing and why.
+
+Examples of correct tool usage:
+
+Example 1 - Creating a file:
+User: Create main.py with a hello world program
+Assistant: [Uses write_file tool]
+  Tool: write_file
+  Arguments: {"path": "main.py", "content": "print('Hello, World!')"}
+
+Example 2 - Reading a file then modifying:
+User: Update the greeting in app.py
+Assistant: [First uses read_file to check current content]
+  Tool: read_file
+  Arguments: {"path": "app.py"}
+[After seeing file content]
+Assistant: [Uses write_file to update]
+  Tool: write_file
+  Arguments: {"path": "app.py", "content": "print('Welcome!')"}
+
+Example 3 - Running a command:
+User: List all Python files in the current directory
+Assistant: [Uses run_command tool]
+  Tool: run_command
+  Arguments: {"command": "dir *.py"}
+
+Remember: Always use tool calls for actions, never output JSON directly in your response text."""
 
     def run(self, user_input: str, stream: bool = False) -> str:
         """Process a user request and return the agent's response.
