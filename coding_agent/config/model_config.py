@@ -1,6 +1,7 @@
 """Model configuration for LLM connections."""
 
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
 from typing import Optional
 
 
@@ -19,9 +20,9 @@ class ModelConfig:
         retry_count: Number of retries on failure.
     """
 
-    base_url: str = "http://localhost:11434/v1"
-    api_key: str = "ollama"
-    model_name: str = "qwen2.5-coder:7b"
+    base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", "http://localhost:11434/v1"))
+    api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", "ollama"))
+    model_name: str = field(default_factory=lambda: os.getenv("LLM_MODEL", "qwen2.5-coder:7b"))
     max_tokens: int = 4096
     timeout: int = 120
     retry_count: int = 3

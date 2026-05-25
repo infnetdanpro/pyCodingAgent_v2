@@ -25,11 +25,11 @@ def main() -> None:
         log_level="INFO",
     )
 
-    # Configure model (adjust for your local setup)
+    # Configure model (adjust for your local setup or use environment variables)
     model_config = ModelConfig(
-        base_url="http://localhost:11434/v1",  # Ollama default
-        api_key="ollama",  # Dummy key for local models
-        model_name="qwen2.5-coder:7b",
+        base_url="http://localhost:11434/v1",  # Ollama default, or set LLM_BASE_URL env var
+        api_key="ollama",  # Dummy key for local models, or set LLM_API_KEY env var
+        model_name="qwen2.5-coder:7b",  # Or set LLM_MODEL env var
     )
 
     # Create agent with context manager for proper cleanup

@@ -131,9 +131,9 @@ def main() -> None:
 
     settings = Settings(workspace_dir=".")
     model_config = ModelConfig(
-        base_url="http://localhost:11434/v1",
-        api_key="ollama",
-        model_name="qwen2.5-coder:7b",
+        base_url="http://localhost:11434/v1",  # Or set LLM_BASE_URL env var
+        api_key="ollama",  # Or set LLM_API_KEY env var
+        model_name="qwen2.5-coder:7b",  # Or set LLM_MODEL env var
     )
 
     with CodingAgent(settings=settings, model_config=model_config) as agent:
