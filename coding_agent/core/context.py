@@ -70,6 +70,40 @@ class ConversationContext:
             Message(role=Role.TOOL, content=content, tool_call_id=tool_call_id)
         )
 
+    def get_last_user_message(self) -> Optional[str]:
+        """Get the last user message from the conversation.
+
+        Returns:
+            Content of the last user message, or None if no user message exists.
+        """
+        for msg in reversed(self.messages):
+            if msg.role == Role.USER:
+                return msg.content
+        return None
+
+    def remove_last_user_message(self) -> bool:
+        """Remove the last user message and any subsequent messages.
+
+        This is useful for retrying the last task by removing it from history
+        so it can be re-processed.
+
+        Returns:
+            True if a user message was removed, False otherwise.
+        """
+        # Find the last user message index
+        last_user_idx = -1
+        for i, msg in enumerate(self.messages):
+            if msg.role == Role.USER:
+                last_user_idx = i
+
+        if last_user_idx == -1:
+            return False
+
+        # Remove the last user message and all messages after it
+        # (including assistant responses and tool results)
+        self.messages = self.messages[:last_user_idx]
+        return True
+
     def get_messages(self) -> list[Message]:
         """Get all messages in the conversation.
 
