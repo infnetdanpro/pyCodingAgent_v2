@@ -17,7 +17,7 @@ class TestModelConfig:
         assert config.api_key == "ollama"
         assert config.model_name == "qwen2.5-coder:7b"
         assert config.max_tokens == 8128
-        assert config.timeout == 120
+        assert config.timeout == 10 * 60
         assert config.retry_count == 3
         assert config.stream is True
 
