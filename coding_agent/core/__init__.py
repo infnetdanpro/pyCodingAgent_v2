@@ -3,6 +3,14 @@
 from .agent import CodingAgent
 from .context import ConversationContext
 from .planner import Plan, PlanItem, PlanMode
+from .enhanced_planner import (
+    EnhancedPlanner,
+    HierarchicalPlan,
+    PlanItem as HierarchicalPlanItem,
+    PlanStatus,
+    DependencyType,
+    Checkpoint,
+)
 from .vulnerability_remediator import (
     VulnerabilityRemediator,
     VulnerabilityFinding,
@@ -16,6 +24,12 @@ __all__ = [
     "Plan",
     "PlanItem",
     "PlanMode",
+    "EnhancedPlanner",
+    "HierarchicalPlan",
+    "HierarchicalPlanItem",
+    "PlanStatus",
+    "DependencyType",
+    "Checkpoint",
     "VulnerabilityRemediator",
     "VulnerabilityFinding",
     "RemediationPlan",
