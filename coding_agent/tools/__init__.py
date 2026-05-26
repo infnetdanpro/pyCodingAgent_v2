@@ -41,6 +41,7 @@ from .messaging import (
     JiraCreateTool,
     AnalyzeTasksTool,
 )
+from .vulnerability_scanner import VulnerabilityScannerTool, VulnerabilityPatterns, ASTSecurityAnalyzer
 
 __all__ = [
     "Tool",
@@ -80,4 +81,7 @@ __all__ = [
     "JiraReceiveTool",
     "JiraCreateTool",
     "AnalyzeTasksTool",
+    "VulnerabilityScannerTool",
+    "VulnerabilityPatterns",
+    "ASTSecurityAnalyzer",
 ]
