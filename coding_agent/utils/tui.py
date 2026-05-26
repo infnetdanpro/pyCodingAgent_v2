@@ -4,6 +4,61 @@ import sys
 from typing import Optional, Callable
 
 
+def questionary_plan_selector(plan_items: list) -> tuple[bool, list]:
+    """Questionary-based interactive plan selector with checkbox selection.
+    
+    Args:
+        plan_items: List of plan items (dicts with 'description', 'enabled' keys).
+    
+    Returns:
+        Tuple of (confirmed, enabled_items) where confirmed is whether user approved.
+    """
+    try:
+        import questionary
+    except ImportError:
+        # Fallback to simple selector if questionary not available
+        return simple_plan_selector(plan_items)
+    
+    # Build choices with initial enabled state
+    choices = []
+    for i, item in enumerate(plan_items):
+        description = item.get('description', 'Unknown')
+        tool_info = f" [tool: {item.get('tool_name', 'none')}]" if item.get('tool_name') else ""
+        choice_text = f"{i + 1}. {description}{tool_info}"
+        # Start with the current enabled state
+        choices.append(questionary.Choice(title=choice_text, value=i, checked=item.get('enabled', True)))
+    
+    # Show checkbox selection
+    selected_indices = questionary.checkbox(
+        "Select plan items to execute (use arrows to navigate, space to toggle, enter to confirm):",
+        choices=choices,
+        instruction="\n\nControls: ↑↓ to navigate | Space to toggle | Enter to confirm",
+        qmark="❯",
+        pointer="►"
+    ).ask()
+    
+    # If user cancelled (Ctrl+C), selected_indices will be None
+    if selected_indices is None:
+        print("\nCancelled.")
+        return False, []
+    
+    # Update plan_items based on selection
+    enabled_items = []
+    for i, item in enumerate(plan_items):
+        if i in selected_indices:
+            item['enabled'] = True
+            enabled_items.append(item)
+        else:
+            item['enabled'] = False
+    
+    if enabled_items:
+        print(f"\nConfirmed! Will execute {len(enabled_items)} of {len(plan_items)} items.")
+        return True, enabled_items
+    else:
+        print("\nNo items selected for execution.")
+        return True, []
+
+
 class PlanSelector:
     """Interactive plan selector using keyboard navigation.
     
@@ -287,10 +342,18 @@ def interactive_plan_selector(plan_items: list, use_curses: bool = True) -> tupl
     Returns:
         Tuple of (confirmed, enabled_items) where confirmed is whether user approved.
     """
+    # Try questionary first (best TUI experience with prompt_toolkit)
+    try:
+        return questionary_plan_selector(plan_items)
+    except Exception:
+        pass
+    
+    # Fall back to curses if available and stdout is a tty
     if use_curses and HAS_CURSES and sys.stdout.isatty():
         try:
             return curses_plan_selector(plan_items)
         except Exception:
             pass
     
+    # Final fallback to simple text-based selector
     return simple_plan_selector(plan_items)
