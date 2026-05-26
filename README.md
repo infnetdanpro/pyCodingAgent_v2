@@ -1,4 +1,4 @@
-# Bobert🦫 Coding Agent Project
+# 🦫 Bobert Coding Agent Project
 
 <div align="center">
 
