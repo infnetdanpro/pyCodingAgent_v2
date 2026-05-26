@@ -180,6 +180,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
             print("\nCommands:")
             print("  /help           - Show available commands")
             print("  /clear          - Clear conversation history")
+            print("  /retry          - Retry the last task")
             print("  /tools          - List available tools")
             print("  /plan           - Generate a plan for your request")
             print("  /scan           - Scan for vulnerabilities and create remediation plan")
@@ -204,6 +205,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
                         print("\nAvailable commands:")
                         print("  /help           - Show this help message")
                         print("  /clear          - Clear conversation history")
+                        print("  /retry          - Retry the last task")
                         print("  /tools          - List available tools")
                         print("  /plan           - Generate and review a plan")
                         print("  /scan           - Scan for vulnerabilities")
@@ -213,6 +215,23 @@ def cmd_chat(args: argparse.Namespace) -> int:
                     elif command == "/clear":
                         agent.clear_context()
                         print("Conversation history cleared.\n")
+                    
+                    elif command == "/retry":
+                        # Retry the last task
+                        last_task = agent.retry_last_task()
+                        if last_task:
+                            print(f"\nRetrying last task: {last_task}\n")
+                            try:
+                                loader = Loader("Waiting for LLM response...")
+                                loader.start()
+                                response = agent.run(last_task)
+                                loader.stop()
+                                print("\n" + response + "\n")
+                            except Exception as e:
+                                loader.stop()
+                                print(f"\nError: {e}\n")
+                        else:
+                            print("\nNo previous task found to retry.\n")
                     
                     elif command == "/tools":
                         print("\nAvailable tools:")

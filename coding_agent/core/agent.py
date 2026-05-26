@@ -225,6 +225,29 @@ Remember: Always use tool calls for actions, never output JSON directly in your 
         self._context.clear()
         logger.info("Cleared conversation context")
 
+    def retry_last_task(self) -> Optional[str]:
+        """Retry the last task by removing it from history and re-processing.
+
+        This method removes the last user message and any subsequent messages
+        (assistant responses and tool results), then returns the removed user
+        message content so it can be re-processed.
+
+        Returns:
+            The content of the last user message that was removed, or None if
+            no user message was found to retry.
+        """
+        last_message = self._context.get_last_user_message()
+        if last_message is None:
+            logger.warning("No user message found to retry")
+            return None
+
+        if self._context.remove_last_user_message():
+            logger.info(f"Retrying last task: {last_message[:50]}...")
+            return last_message
+        else:
+            logger.warning("Failed to remove last user message")
+            return None
+
     def close(self) -> None:
         """Close the agent and release resources."""
         self._client.close()
