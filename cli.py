@@ -4,7 +4,9 @@
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
+from typing import Optional
 
 from coding_agent.config import ModelConfig, Settings
 from coding_agent.core import CodingAgent, PlanMode
@@ -17,6 +19,39 @@ from coding_agent.tools import (
     WriteFileTool,
 )
 from coding_agent.utils import setup_logging, interactive_plan_selector
+
+
+class Loader:
+    """Simple loader animation for displaying progress during LLM requests."""
+    
+    def __init__(self, message: str = "Loading"):
+        self.message = message
+        self._running = False
+    
+    def _animate(self):
+        """Display the loading animation."""
+        frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        i = 0
+        while self._running:
+            sys.stdout.write(f"\r{frames[i % len(frames)]} {self.message}")
+            sys.stdout.flush()
+            time.sleep(0.1)
+            i += 1
+        sys.stdout.write("\r" + " " * (len(self.message) + 2) + "\r")
+        sys.stdout.flush()
+    
+    def start(self):
+        """Start the loader animation."""
+        self._running = True
+        import threading
+        self._thread = threading.Thread(target=self._animate, daemon=True)
+        self._thread.start()
+    
+    def stop(self):
+        """Stop the loader animation."""
+        self._running = False
+        if hasattr(self, '_thread'):
+            self._thread.join(timeout=0.5)
 
 
 def create_agent(workspace_dir: str, model_config: ModelConfig) -> CodingAgent:
@@ -197,7 +232,10 @@ def cmd_chat(args: argparse.Namespace) -> int:
                         available_tools = agent.tool_registry.get_all_schemas()
                         
                         # Generate plan
+                        loader = Loader("Generating plan...")
+                        loader.start()
                         plan = plan_mode.generate_plan(plan_request, system_prompt, available_tools)
+                        loader.stop()
                         
                         if plan:
                             print(f"\n{plan}")
@@ -228,9 +266,14 @@ def cmd_chat(args: argparse.Namespace) -> int:
                                 execution_request += "\nPlease execute these steps in order."
                                 
                                 try:
+                                    # Show loader while waiting for LLM response
+                                    loader = Loader("Executing plan...")
+                                    loader.start()
                                     response = agent.run(execution_request)
+                                    loader.stop()
                                     print("\n" + response + "\n")
                                 except Exception as e:
+                                    loader.stop()
                                     print(f"\nError during execution: {e}\n")
                             elif confirmed:
                                 print("\nNo items selected for execution.\n")
@@ -247,9 +290,14 @@ def cmd_chat(args: argparse.Namespace) -> int:
                     continue
                 
                 try:
+                    # Show loader while waiting for LLM response
+                    loader = Loader("Waiting for LLM response...")
+                    loader.start()
                     response = agent.run(user_input)
+                    loader.stop()
                     print("\n" + response + "\n")
                 except Exception as e:
+                    loader.stop()
                     print(f"\nError: {e}\n")
     
     except Exception as e:
