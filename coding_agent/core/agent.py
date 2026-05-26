@@ -138,22 +138,26 @@ Remember: Always use tool calls for actions, never output JSON directly in your 
         iteration = 0
         while iteration < self.settings.max_iterations:
             iteration += 1
-            logger.debug(f"Iteration {iteration}/{self.settings.max_iterations}")
+            logger.info(f"Iteration {iteration}/{self.settings.max_iterations}")
 
             messages = self._context.get_messages()
             tools_schema = self.tool_registry.get_all_schemas()
 
             try:
+                logger.info("Waiting for LLM response...")
                 content, tool_calls = self._client.chat(messages, tools=tools_schema)
+                logger.info(f"LLM response received (content length: {len(content)}, tool calls: {len(tool_calls) if tool_calls else 0})")
             except Exception as e:
                 logger.error(f"LLM request failed: {e}")
                 return f"Error: Failed to communicate with LLM - {e}"
 
             # Execute tool calls if present
             if tool_calls:
+                logger.info(f"Executing {len(tool_calls)} tool call(s)")
                 for tool_call in tool_calls:
                     result = self._execute_tool_call(tool_call)
                     self._context.add_tool_result(tool_call.id, result.output)
+                    logger.info(f"Tool '{tool_call.name}' executed: success={result.success}")
 
                     if not result.success:
                         logger.warning(f"Tool execution failed: {result.error}")
@@ -183,15 +187,20 @@ Remember: Always use tool calls for actions, never output JSON directly in your 
         try:
             arguments = json.loads(tool_call.arguments) if tool_call.arguments else {}
         except json.JSONDecodeError:
+            logger.error(f"Invalid JSON arguments for tool '{tool_call.name}': {tool_call.arguments}")
             return ToolResult(success=False, error="Invalid JSON arguments")
 
         logger.info(f"Executing tool: {tool_call.name} with args: {arguments}")
 
         try:
-            return self.tool_registry.execute(tool_call.name, **arguments)
+            result = self.tool_registry.execute(tool_call.name, **arguments)
+            logger.info(f"Tool '{tool_call.name}' completed: success={result.success}")
+            return result
         except KeyError:
+            logger.error(f"Unknown tool requested: {tool_call.name}")
             return ToolResult(success=False, error=f"Unknown tool: {tool_call.name}")
         except Exception as e:
+            logger.error(f"Tool '{tool_call.name}' execution error: {e}")
             return ToolResult(success=False, error=f"Tool execution error: {e}")
 
     def register_tool(self, tool) -> None:

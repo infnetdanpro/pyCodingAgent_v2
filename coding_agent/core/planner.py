@@ -116,7 +116,9 @@ Return ONLY the JSON object, no other text.""")
         ]
         
         try:
+            logger.info("Waiting for LLM to generate plan...")
             content, _ = self._client.chat(messages, tools=None)
+            logger.info(f"Plan generation complete (response length: {len(content)})")
             
             # Parse the plan from response
             import json
@@ -135,9 +137,11 @@ Return ONLY the JSON object, no other text.""")
                     )
                 
                 self._current_plan = plan
+                logger.info(f"Plan parsed successfully: {len(plan.items)} steps")
                 return plan
             else:
                 # Fallback: create a simple plan from the text
+                logger.warning("Could not parse JSON from plan response, using fallback")
                 plan = Plan(title="Execution Plan")
                 plan.add_item(description=content[:200])
                 self._current_plan = plan

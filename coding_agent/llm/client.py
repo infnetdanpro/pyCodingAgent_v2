@@ -68,11 +68,18 @@ class LLMClient:
         """
         payload = self._build_payload(messages, tools, stream)
 
+        logger.info(f"Sending chat request to LLM (model: {self.config.model_name})")
+        logger.debug(f"Payload: {json.dumps(payload, indent=2)[:500]}...")
+
         for attempt in range(self.config.retry_count + 1):
             try:
+                logger.debug(f"Attempt {attempt + 1}/{self.config.retry_count + 1}")
                 response = self._client.post("/chat/completions", json=payload)
                 response.raise_for_status()
-                return self._parse_response(response.json())
+                result = self._parse_response(response.json())
+                logger.info(f"LLM response received successfully")
+                logger.debug(f"Response content length: {len(result[0])}, tool_calls: {len(result[1]) if result[1] else 0}")
+                return result
             except httpx.HTTPError as e:
                 if attempt == self.config.retry_count:
                     logger.error(f"LLM request failed after {attempt + 1} attempts: {e}")
@@ -97,20 +104,32 @@ class LLMClient:
         """
         payload = self._build_payload(messages, tools, stream=True)
 
+        logger.info(f"Starting streaming chat request to LLM (model: {self.config.model_name})")
+        
         with self._client.stream("POST", "/chat/completions", json=payload) as response:
             response.raise_for_status()
+            logger.debug("Streaming connection established")
+            
+            chunk_count = 0
+            total_content_length = 0
+            
             for line in response.iter_lines():
                 if line.startswith("data: "):
                     data = line[6:]
                     if data == "[DONE]":
+                        logger.debug("Received [DONE] signal")
                         break
                     try:
                         chunk = json.loads(data)
                         content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
                         if content:
+                            chunk_count += 1
+                            total_content_length += len(content)
                             yield content
                     except json.JSONDecodeError:
                         continue
+            
+            logger.info(f"Streaming complete: received {chunk_count} chunks, {total_content_length} characters")
 
     def _build_payload(
         self,
@@ -152,8 +171,11 @@ class LLMClient:
         Returns:
             Tuple of (content, tool calls).
         """
+        logger.debug(f"Parsing LLM response")
+        
         choices = response_data.get("choices", [])
         if not choices:
+            logger.warning("No choices in LLM response")
             return "", None
 
         message = choices[0].get("message", {})
@@ -162,6 +184,7 @@ class LLMClient:
 
         # First check for native tool_calls format (OpenAI standard)
         if "tool_calls" in message and message["tool_calls"]:
+            logger.info(f"Found {len(message['tool_calls'])} native tool calls in response")
             tool_calls = [
                 ToolCall(
                     id=tc["id"],
@@ -175,8 +198,10 @@ class LLMClient:
         elif content:
             parsed_tool_calls = self._parse_tool_calls_from_content(content)
             if parsed_tool_calls:
+                logger.info(f"Parsed {len(parsed_tool_calls)} tool calls from content")
                 tool_calls = parsed_tool_calls
 
+        logger.debug(f"Response content length: {len(content)}, tool_calls found: {len(tool_calls) if tool_calls else 0}")
         return content, tool_calls
 
     def _parse_tool_calls_from_content(self, content: str) -> Optional[list[ToolCall]]:
