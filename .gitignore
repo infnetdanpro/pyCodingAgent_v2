@@ -1,43 +1,39 @@
-```
+```gitignore
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Dependencies
-.venv/
+.Python
+python/
 venv/
 env/
-.env
-.env.local
-.env.*
-
-# Build artifacts
-dist/
-build/
-*.egg-info/
-
-# Logs
+ENV/
+.venv/
+.env/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
 *.log
-
-# Temporary files
 *.tmp
 *.swp
-*~
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
+*.swo
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS
-.DS_Store
-Thumbs.db
+# Testing
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+
+# History
+.agent_history/
 ```

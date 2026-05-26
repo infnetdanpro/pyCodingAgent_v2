@@ -296,3 +296,114 @@ class SearchFilesTool(Tool):
 
         except Exception as e:
             return ToolResult(success=False, error=str(e))
+
+
+class GetTreeTool(Tool):
+    """Tool for getting a tree view of files and directories."""
+
+    def __init__(self, workspace_root: str = ".", max_depth: int = 3) -> None:
+        """Initialize the get tree tool.
+
+        Args:
+            workspace_root: Root directory for file operations.
+            max_depth: Maximum depth to traverse (default: 3).
+        """
+        self._fs_tools = FileSystemTools(workspace_root)
+        self._max_depth = max_depth
+
+    @property
+    def name(self) -> str:
+        """Return tool name."""
+        return "get_tree"
+
+    @property
+    def description(self) -> str:
+        """Return tool description."""
+        return "Get a tree view of files and directories from the current directory. Shows the hierarchical structure with optional depth control."
+
+    @property
+    def schema(self) -> dict:
+        """Return tool parameter schema."""
+        return {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Relative path to the directory from workspace root (default: current directory)",
+                },
+                "max_depth": {
+                    "type": "integer",
+                    "description": f"Maximum depth to traverse (default: {self._max_depth})",
+                },
+            },
+            "required": [],
+        }
+
+    def _build_tree(self, dir_path: Path, prefix: str = "", depth: int = 0, max_depth: int = 3) -> list[str]:
+        """Build tree representation recursively.
+
+        Args:
+            dir_path: Directory path to traverse.
+            prefix: Current prefix string for indentation.
+            depth: Current depth level.
+            max_depth: Maximum depth to traverse.
+
+        Returns:
+            List of strings representing the tree.
+        """
+        result = []
+        
+        if depth > max_depth:
+            return result
+        
+        try:
+            items = sorted(dir_path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower()))
+        except PermissionError:
+            return [f"{prefix}[Permission Denied]"]
+        
+        for i, item in enumerate(items):
+            is_last = i == len(items) - 1
+            connector = "└── " if is_last else "├── "
+            
+            if item.is_dir():
+                result.append(f"{prefix}{connector}[DIR] {item.name}")
+                extension = "    " if is_last else "│   "
+                result.extend(self._build_tree(item, prefix + extension, depth + 1, max_depth))
+            else:
+                result.append(f"{prefix}{connector}{item.name}")
+        
+        return result
+
+    def execute(self, **kwargs: Any) -> ToolResult:
+        """Execute the get tree operation.
+
+        Args:
+            **kwargs: Optional 'path' and 'max_depth' keys.
+
+        Returns:
+            ToolResult with tree output or error.
+        """
+        try:
+            path = kwargs.get("path", ".")
+            max_depth = kwargs.get("max_depth", self._max_depth)
+
+            dir_path = self._fs_tools._safe_path(path)
+
+            if not dir_path.exists():
+                return ToolResult(success=False, error=f"Directory not found: {path}")
+
+            if not dir_path.is_dir():
+                return ToolResult(success=False, error=f"Not a directory: {path}")
+
+            # Add root directory name
+            root_name = dir_path.name if dir_path.name else str(dir_path)
+            tree_lines = [f"[DIR] {root_name}"]
+            
+            # Build tree structure
+            tree_lines.extend(self._build_tree(dir_path, "", 0, max_depth))
+            
+            output = "\n".join(tree_lines)
+            return ToolResult(success=True, output=output)
+
+        except Exception as e:
+            return ToolResult(success=False, error=str(e))

@@ -84,6 +84,7 @@ Available tools allow you to:
 - Read and write files
 - List directory contents
 - Search for files
+- Get a tree view of directory structure
 - Execute shell commands
 - Run Python code snippets
 
@@ -112,6 +113,12 @@ User: List all Python files in the current directory
 Assistant: [Uses run_command tool]
   Tool: run_command
   Arguments: {"command": "dir *.py"}
+
+Example 4 - Getting a tree view:
+User: Show me the directory structure
+Assistant: [Uses get_tree tool]
+  Tool: get_tree
+  Arguments: {"path": ".", "max_depth": 2}
 
 Remember: Always use tool calls for actions, never output JSON directly in your response text."""
 

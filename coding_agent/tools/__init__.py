@@ -7,6 +7,7 @@ from .filesystem import (
     ReadFileTool,
     SearchFilesTool,
     WriteFileTool,
+    GetTreeTool,
 )
 from .shell import RunCommandTool, RunPythonTool, ShellTools
 from .process import (
@@ -58,6 +59,7 @@ __all__ = [
     "WriteFileTool",
     "ListDirTool",
     "SearchFilesTool",
+    "GetTreeTool",
     "RunCommandTool",
     "RunPythonTool",
     "StartProcessTool",
