@@ -18,9 +18,18 @@
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
+- [CLI Usage](#cli-usage)
+  - [Plan Mode in CLI](#plan-mode-in-cli)
+  - [CLI Options Reference](#cli-options-reference)
 - [Quick Start](#quick-start)
 - [Usage Examples](#usage-examples)
+  - [Plan Mode Example](#example-7-plan-mode---structured-task-execution)
+- [Plan Mode](#plan-mode)
 - [Available Tools](#available-tools)
+  - [File System Tools](#file-system-tools)
+  - [Shell & Process Tools](#shell--process-tools)
+  - [Browser Automation Tools](#browser-automation-tools)
+  - [Messaging & Integration Tools](#messaging--integration-tools)
 - [Configuration](#configuration)
 - [Creating Custom Tools](#creating-custom-tools)
 - [Design Principles](#design-principles)
@@ -212,7 +221,111 @@ When using `agent chat`, you can use these special commands:
 | `/help` | Show available commands |
 | `/clear` | Clear conversation history |
 | `/tools` | List available tools |
+| `/plan <request>` | Generate and execute a plan for your request |
 | `/quit` | Exit the chat session |
+
+### Plan Mode in CLI
+
+The `/plan` command in interactive chat allows you to generate, review, and execute plans:
+
+```bash
+$ agent chat
+
+> /plan Create a Flask API with user authentication
+
+Generating plan...
+
+Plan: Create Flask API with Authentication
+  1. [☐] Create project directory structure
+  2. [☐] Install Flask and dependencies
+  3. [☐] Create app.py with basic Flask setup
+  4. [☐] Implement user registration endpoint
+  5. [☐] Implement login/logout endpoints
+  6. [☐] Add password hashing with bcrypt
+  7. [☐] Create database models
+  8. [☐] Write basic tests
+
+Select plan items to execute (or press Enter to execute all):
+> _
+```
+
+You can then select which steps to execute by toggling them on/off before confirmation.
+
+### Complete CLI Workflow Example
+
+```bash
+# 1. Initialize a new project directory
+agent init my-flask-app
+cd my-flask-app
+
+# 2. Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# 3. Start interactive chat
+agent chat --model qwen2.5-coder:7b
+
+# In the chat session:
+# > Create a Flask application with a hello world endpoint
+# > Add a /users endpoint that returns a list of users
+# > /plan Add user authentication with JWT tokens
+# > /quit
+
+# 4. Or run a single command non-interactively
+agent run "Add type hints to all functions in app.py"
+```
+
+### Advanced CLI Usage
+
+#### Custom Model Configuration
+
+```bash
+# Use OpenAI GPT-4
+agent chat \
+  --base-url https://api.openai.com/v1 \
+  --api-key $OPENAI_API_KEY \
+  --model gpt-4-turbo-preview
+
+# Use Anthropic Claude via proxy
+agent chat \
+  --base-url https://your-claude-proxy.com/v1 \
+  --api-key $ANTHROPIC_API_KEY \
+  --model claude-3-opus-20240229
+```
+
+#### Debugging with Verbose Logging
+
+```bash
+# Enable DEBUG logging to see detailed agent reasoning
+agent chat --log-level DEBUG
+
+# Logs will show:
+# - LLM requests and responses
+# - Tool execution details
+# - Agent decision-making process
+```
+
+### CLI Options Reference
+
+#### Global Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--base-url` | LLM API base URL | `http://localhost:11434/v1` |
+| `--api-key` | LLM API key | `ollama` |
+| `--model` | LLM model name | `qwen2.5-coder:7b` |
+| `--log-level` | Logging level (DEBUG/INFO/WARNING/ERROR) | `INFO` |
+| `-w, --workspace` | Workspace directory | Current directory |
+
+#### Environment Variables
+
+You can configure defaults using environment variables:
+
+```bash
+export LLM_BASE_URL=http://localhost:11434/v1
+export LLM_API_KEY=your-api-key
+export LLM_MODEL=qwen2.5-coder:7b
+```
 
 ---
 
@@ -335,24 +448,335 @@ with CodingAgent() as agent:
     print(response)
 ```
 
+### Example 5: Process Management
+
+```python
+from coding_agent.tools import StartProcessTool, ListProcessesTool, StopProcessTool
+
+with CodingAgent() as agent:
+    agent.register_tool(StartProcessTool())
+    agent.register_tool(ListProcessesTool())
+    agent.register_tool(StopProcessTool())
+    
+    # Start a web server in background
+    response = agent.run(
+        "Start a Python HTTP server on port 8000 in the background"
+    )
+    print(response)
+    
+    # List running processes
+    response = agent.run("List all running processes")
+    print(response)
+    
+    # Stop the server when done
+    response = agent.run("Stop the HTTP server process")
+    print(response)
+```
+
+### Example 6: Browser Automation
+
+```python
+from coding_agent.tools import (
+    BrowserNavigateTool, 
+    BrowserScreenshotTool, 
+    BrowserGetContentTool
+)
+
+with CodingAgent() as agent:
+    agent.register_tool(BrowserNavigateTool())
+    agent.register_tool(BrowserScreenshotTool())
+    agent.register_tool(BrowserGetContentTool())
+    
+    # Navigate and capture content
+    response = agent.run(
+        "Navigate to https://example.com, take a screenshot, and extract the main content"
+    )
+    print(response)
+```
+
+### Example 7: Plan Mode - Structured Task Execution
+
+Plan Mode allows you to generate a detailed plan first, review and modify it, then execute the approved steps:
+
+```python
+from coding_agent.core import CodingAgent, PlanMode
+from coding_agent.config import ModelConfig
+from coding_agent.tools import ReadFileTool, WriteFileTool, RunCommandTool
+
+# Setup
+model_config = ModelConfig(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama",
+    model_name="qwen2.5-coder:7b"
+)
+
+with CodingAgent() as agent:
+    agent.register_tool(ReadFileTool())
+    agent.register_tool(WriteFileTool())
+    agent.register_tool(RunCommandTool())
+    
+    # Initialize plan mode
+    plan_mode = PlanMode(model_config)
+    
+    # Generate a plan for a complex task
+    plan_request = "Create a Python package with setup.py, README.md, and a basic module structure"
+    
+    # Get system prompt and available tools
+    context = agent.get_context()
+    system_prompt = context.system_prompt
+    available_tools = agent.tool_registry.get_all_schemas()
+    
+    # Generate plan
+    plan = plan_mode.generate_plan(plan_request, system_prompt, available_tools)
+    
+    # Review the plan
+    print(plan)
+    # Output:
+    # Plan: Create Python Package Structure
+    #   1. [☐] Create directory structure: mypackage/__init__.py
+    #   2. [☐] Create setup.py with package metadata
+    #   3. [☐] Create README.md with project description
+    #   4. [☐] Create example module file
+    
+    # Enable/disable specific plan items as needed
+    plan_mode.toggle_plan_item(index=2)  # Disable README creation for now
+    
+    # Execute the enabled plan items
+    enabled_items = plan.get_enabled_items()
+    print(f"Executing {len(enabled_items)} steps...")
+    
+    # Agent will execute the enabled steps in sequence
+    for item in enabled_items:
+        response = agent.run(f"Execute: {item.description}")
+        print(response)
+        item.completed = True
+    
+    print("Plan execution complete!")
+```
+
+---
+
+## 🎯 Plan Mode
+
+Plan Mode is a powerful feature that separates planning from execution, giving you full control over complex tasks.
+
+### How Plan Mode Works
+
+1. **Generate Plan**: The LLM analyzes your request and creates a structured plan with discrete steps
+2. **Review & Modify**: You can review each step, enable/disable specific items, or reorder them
+3. **Execute**: Only the enabled steps are executed in sequence
+4. **Track Progress**: Each completed step is marked, allowing you to track progress
+
+### Benefits of Plan Mode
+
+- **Transparency**: See exactly what the agent plans to do before it does it
+- **Control**: Disable risky steps or reorganize the execution order
+- **Debugging**: Easier to identify where things went wrong in a multi-step task
+- **Learning**: Understand the agent's reasoning and decision-making process
+
+### Plan Mode Architecture
+
+The `PlanMode` class consists of:
+
+- **`Plan`**: Container for the plan title and list of items
+- **`PlanItem`**: Individual step with description, optional tool assignment, and enabled/completed status
+- **`generate_plan()`**: Creates a plan from user request using LLM
+- **`toggle_plan_item()`**: Enable/disable specific steps
+- **`get_current_plan()`**: Retrieve the active plan
+
+### When to Use Plan Mode
+
+Plan Mode is especially useful for:
+
+- Complex multi-file refactoring tasks
+- Database migrations or schema changes
+- Deployments with multiple steps
+- Tasks requiring user approval at each stage
+- Learning and understanding the agent's approach
+
 ---
 
 ## 🛠️ Available Tools
 
-The coding agent comes with a comprehensive set of built-in tools:
+The coding agent comes with a comprehensive set of built-in tools organized into several categories:
+
+### File System Tools
 
 | Tool | Class | Description |
 |------|-------|-------------|
-| **read_file** | `ReadFileTool` | Read contents of a file |
+| **read_file** | `ReadFileTool` | Read contents of a file with optional line range |
 | **write_file** | `WriteFileTool` | Write content to a file (creates or overwrites) |
-| **list_dir** | `ListDirTool` | List directory contents with file details |
-| **search_files** | `SearchFilesTool` | Search files by glob pattern |
-| **run_command** | `RunCommandTool` | Execute shell commands safely |
-| **run_python** | `RunPythonTool` | Execute Python code snippets |
+| **list_dir** | `ListDirTool` | List directory contents with file details (type, size, modified time) |
+| **search_files** | `SearchFilesTool` | Search files by glob pattern (e.g., `*.py`, `**/*.md`) |
+| **get_tree** | `GetTreeTool` | Get a tree view of directory structure |
+
+### Shell & Process Tools
+
+| Tool | Class | Description |
+|------|-------|-------------|
+| **run_command** | `RunCommandTool` | Execute shell commands safely within workspace |
+| **run_python** | `RunPythonTool` | Execute Python code snippets in isolated environment |
+| **start_process** | `StartProcessTool` | Start a long-running process in the background |
+| **stop_process** | `StopProcessTool` | Stop a previously started process by PID |
+| **list_processes** | `ListProcessesTool` | List all processes started by the agent |
+| **get_process_info** | `GetProcessInfoTool` | Get detailed information about a specific process |
+
+### Browser Automation Tools
+
+| Tool | Class | Description |
+|------|-------|-------------|
+| **browser_navigate** | `BrowserNavigateTool` | Navigate to a URL in a headless browser |
+| **browser_click** | `BrowserClickTool` | Click on an element identified by CSS selector |
+| **browser_fill** | `BrowserFillTool` | Fill a form field with text |
+| **browser_screenshot** | `BrowserScreenshotTool` | Take a screenshot of the current page |
+| **browser_get_content** | `BrowserGetContentTool` | Extract text content from the current page |
+| **browser_evaluate** | `BrowserEvaluateTool` | Execute JavaScript in the browser context |
+| **browser_close** | `BrowserCloseTool` | Close the browser session |
+
+### Messaging & Integration Tools
+
+| Tool | Class | Description |
+|------|-------|-------------|
+| **slack_receive** | `SlackReceiveTool` | Receive messages from Slack channels |
+| **slack_send** | `SlackSendTool` | Send messages to Slack channels |
+| **telegram_receive** | `TelegramReceiveTool` | Receive messages from Telegram chats |
+| **telegram_send** | `TelegramSendTool` | Send messages to Telegram chats |
+| **jira_receive** | `JiraReceiveTool` | Fetch tasks/issues from Jira |
+| **jira_create** | `JiraCreateTool` | Create new issues in Jira |
+| **analyze_tasks** | `AnalyzeTasksTool` | Analyze and prioritize tasks from messaging platforms |
 
 ### Tool Security
 
-All file system tools operate within a configured `workspace_root` directory to prevent unauthorized access to sensitive files outside the project scope.
+All file system and shell tools operate within a configured `workspace_root` directory to prevent unauthorized access to sensitive files outside the project scope. Process tools track spawned processes and allow for proper cleanup.
+
+### Tool Usage Examples
+
+#### File Operations
+```python
+from coding_agent.tools import ReadFileTool, WriteFileTool, ListDirTool
+
+# Read a specific file
+tool = ReadFileTool()
+result = tool.execute(path="src/main.py")
+
+# Write a new file
+tool = WriteFileTool()
+result = tool.execute(path="test.py", content="print('Hello')")
+
+# List directory with details
+tool = ListDirTool()
+result = tool.execute(path=".")
+```
+
+#### Process Management
+```python
+from coding_agent.tools import StartProcessTool, StopProcessTool
+
+# Start a long-running server
+tool = StartProcessTool()
+result = tool.execute(command="python -m http.server 8000")
+# Returns: {"pid": 12345, "status": "running"}
+
+# Stop the process later
+tool = StopProcessTool()
+result = tool.execute(pid=12345)
+```
+
+#### Browser Automation
+```python
+from coding_agent.tools import BrowserNavigateTool, BrowserClickTool, BrowserScreenshotTool
+
+# Navigate to a website
+tool = BrowserNavigateTool()
+result = tool.execute(url="https://example.com")
+
+# Take a screenshot
+tool = BrowserScreenshotTool()
+result = tool.execute(path="screenshot.png")
+
+# Click a button
+tool = BrowserClickTool()
+result = tool.execute(selector="#login-button")
+```
+
+#### Messaging Integration
+```python
+from coding_agent.tools import SlackSendTool, TelegramSendTool, JiraCreateTool
+
+# Send a Slack message
+tool = SlackSendTool()
+result = tool.execute(
+    channel="#general",
+    text="Deployment complete! ✅"
+)
+
+# Send a Telegram message
+tool = TelegramSendTool()
+result = tool.execute(
+    chat_id="123456789",
+    text="Alert: Server CPU usage above 90%"
+)
+
+# Create a Jira issue
+tool = JiraCreateTool()
+result = tool.execute(
+    project="PROJ",
+    summary="Fix login bug",
+    description="Users unable to login with special characters in password",
+    issuetype="Bug",
+    priority="High"
+)
+```
+
+### Tool Architecture
+
+All tools follow a consistent architecture:
+
+```python
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any, Optional
+
+@dataclass
+class ToolResult:
+    """Standard result structure for all tools."""
+    success: bool
+    output: str = ""
+    error: Optional[str] = None
+    data: Optional[Any] = None
+
+class Tool(ABC):
+    """Base class for all tools."""
+    
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Unique tool identifier."""
+        pass
+    
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """Human-readable description for LLM."""
+        pass
+    
+    @property
+    @abstractmethod
+    def schema(self) -> dict:
+        """JSON Schema for tool parameters."""
+        pass
+    
+    @abstractmethod
+    def execute(self, **kwargs: Any) -> ToolResult:
+        """Execute the tool with given parameters."""
+        pass
+```
+
+This consistent interface allows:
+- Easy registration with the agent
+- Automatic schema generation for LLM function calling
+- Standardized error handling
+- Simple testing and mocking
 
 ---
 
@@ -484,6 +908,68 @@ with CodingAgent() as agent:
 3. **Proper Schemas**: Define clear JSON schemas for parameters
 4. **Error Handling**: Always handle exceptions gracefully
 5. **Security**: Validate inputs and respect workspace boundaries
+
+### Tool Development Workflow
+
+1. **Identify the Need**: Determine what capability is missing
+2. **Design the Interface**: Define clear inputs and outputs
+3. **Implement the Tool**: Extend the `Tool` base class
+4. **Write Tests**: Ensure reliable behavior
+5. **Register and Test**: Add to agent and test with real scenarios
+
+```python
+# Example: Testing a custom tool
+import pytest
+from coding_agent.tools import ToolResult
+from your_module import YourCustomTool
+
+def test_your_tool():
+    tool = YourCustomTool()
+    result = tool.execute(param1="value1")
+    
+    assert isinstance(result, ToolResult)
+    assert result.success is True
+    assert "expected" in result.output
+```
+
+---
+
+## 🧪 Testing Your Tools
+
+The project includes comprehensive tests for all built-in tools. When creating custom tools, follow similar testing patterns:
+
+```python
+# tests/test_custom_tools.py
+import pytest
+from coding_agent.tools import ToolResult
+from coding_agent.tools.browser import BrowserNavigateTool
+
+class TestBrowserTools:
+    def test_navigate_valid_url(self):
+        tool = BrowserNavigateTool()
+        result = tool.execute(url="https://example.com")
+        assert result.success is True
+        assert "navigated" in result.output.lower()
+    
+    def test_navigate_invalid_url(self):
+        tool = BrowserNavigateTool()
+        result = tool.execute(url="not-a-valid-url")
+        assert result.success is False
+        assert "error" in result.output.lower()
+```
+
+Run tests with pytest:
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run specific test file
+pytest tests/test_custom_tools.py
+
+# Run with coverage
+pytest --cov=coding_agent tests/
+```
 
 ---
 
