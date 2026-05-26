@@ -25,20 +25,14 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
-.coverage.*
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# Logs
-*.log
+coverage/
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
+.venv/
+venv/
+ENV/
+env.bak/
 ```

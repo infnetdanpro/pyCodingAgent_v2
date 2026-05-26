@@ -161,6 +161,13 @@ Remember: Always use tool calls for actions, never output JSON directly in your 
 
                     if not result.success:
                         logger.warning(f"Tool execution failed: {result.error}")
+                    
+                    # Print tool output to console for user visibility
+                    if result.output and result.output != "(no output)":
+                        print(f"\n[Tool: {tool_call.name}]")
+                        print(result.output)
+                        if not result.success and result.error:
+                            print(f"[Error: {result.error}]")
                 
                 # Continue the loop to let LLM process tool results
                 continue
