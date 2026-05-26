@@ -8,6 +8,7 @@ import pytest
 
 from coding_agent.tools.filesystem import (
     FileSystemTools,
+    GetTreeTool,
     ListDirTool,
     ReadFileTool,
     SearchFilesTool,
@@ -250,3 +251,98 @@ class TestSearchFilesTool:
 
         assert result.success is False
         assert "pattern" in result.error.lower()
+
+
+class TestGetTreeTool:
+    """Tests for the GetTreeTool class."""
+
+    def test_tree_empty_directory(self, temp_workspace):
+        """Test getting tree of an empty directory."""
+        dir_path = Path(temp_workspace) / "empty_tree_dir"
+        dir_path.mkdir()
+
+        tool = GetTreeTool(workspace_root=temp_workspace)
+        result = tool.execute(path="empty_tree_dir")
+
+        assert result.success is True
+        assert "empty_tree_dir" in result.output
+
+    def test_tree_with_files_and_dirs(self, temp_workspace):
+        """Test tree with files and subdirectories."""
+        root_dir = Path(temp_workspace) / "tree_root"
+        root_dir.mkdir()
+        (root_dir / "file1.txt").write_text("content1")
+        subdir = root_dir / "subdir"
+        subdir.mkdir()
+        (subdir / "file2.txt").write_text("content2")
+
+        tool = GetTreeTool(workspace_root=temp_workspace)
+        result = tool.execute(path="tree_root")
+
+        assert result.success is True
+        assert "[DIR] tree_root" in result.output
+        assert "file1.txt" in result.output
+        assert "[DIR] subdir" in result.output
+        assert "file2.txt" in result.output
+
+    def test_tree_respects_max_depth(self, temp_workspace):
+        """Test that tree respects max_depth parameter."""
+        # Create deep nested structure
+        deep = Path(temp_workspace) / "deep_root" / "level1" / "level2" / "level3"
+        deep.mkdir(parents=True)
+        (deep / "deep_file.txt").write_text("deep content")
+
+        tool = GetTreeTool(workspace_root=temp_workspace, max_depth=0)
+        result = tool.execute(path="deep_root", max_depth=0)
+
+        assert result.success is True
+        # With max_depth=0, only root and level1 are shown
+        assert "level1" in result.output
+        # level2 and beyond should not be visible with max_depth=0
+        assert "level2" not in result.output
+        assert "deep_file.txt" not in result.output
+
+    def test_tree_nonexistent_directory(self, temp_workspace):
+        """Test tree on a directory that doesn't exist."""
+        tool = GetTreeTool(workspace_root=temp_workspace)
+        result = tool.execute(path="nonexistent_tree_dir")
+
+        assert result.success is False
+        assert "not found" in result.error.lower()
+
+    def test_tree_on_file_fails(self, temp_workspace):
+        """Test that getting tree of a file fails."""
+        file_path = Path(temp_workspace) / "treefile.txt"
+        file_path.write_text("content")
+
+        tool = GetTreeTool(workspace_root=temp_workspace)
+        result = tool.execute(path="treefile.txt")
+
+        assert result.success is False
+        assert "not a directory" in result.error.lower()
+
+    def test_tree_default_path_is_current_dir(self, temp_workspace):
+        """Test that default path uses current directory."""
+        # Create a file in the workspace root
+        (Path(temp_workspace) / "root_file.txt").write_text("root content")
+
+        tool = GetTreeTool(workspace_root=temp_workspace)
+        result = tool.execute()  # No path specified
+
+        assert result.success is True
+        assert "root_file.txt" in result.output
+
+    def test_tree_uses_instance_max_depth_default(self, temp_workspace):
+        """Test that instance max_depth is used when not specified in execute."""
+        # Create nested structure
+        nested = Path(temp_workspace) / "depth_test" / "l1" / "l2"
+        nested.mkdir(parents=True)
+        (nested / "file.txt").write_text("content")
+
+        # Tool with max_depth=0 at instance level
+        tool = GetTreeTool(workspace_root=temp_workspace, max_depth=0)
+        result = tool.execute(path="depth_test")  # No max_depth specified
+
+        assert result.success is True
+        assert "l1" in result.output
+        assert "l2" not in result.output
