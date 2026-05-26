@@ -1,39 +1,4 @@
-```gitignore
-# Python
+```
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-python/
-venv/
-env/
-ENV/
-.venv/
-.env/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-*.tmp
-*.swp
-*.swo
-
-# IDE
-.vscode/
-.idea/
-
-# Testing
-.pytest_cache/
-.mypy_cache/
-.hypothesis/
-
-# History
-.agent_history/
 ```
