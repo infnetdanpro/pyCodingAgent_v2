@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 from coding_agent.config import ModelConfig, Settings
-from coding_agent.core import CodingAgent, PlanMode
+from coding_agent.core import CodingAgent, PlanMode, VulnerabilityRemediator
 from coding_agent.tools import (
     ListDirTool,
     ReadFileTool,
@@ -17,6 +17,7 @@ from coding_agent.tools import (
     RunPythonTool,
     SearchFilesTool,
     WriteFileTool,
+    VulnerabilityScannerTool,
 )
 from coding_agent.utils import setup_logging, interactive_plan_selector
 
@@ -79,6 +80,7 @@ def create_agent(workspace_dir: str, model_config: ModelConfig) -> CodingAgent:
     agent.register_tool(SearchFilesTool(workspace_root=workspace_dir))
     agent.register_tool(RunCommandTool(workspace_root=workspace_dir))
     agent.register_tool(RunPythonTool(workspace_root=workspace_dir))
+    agent.register_tool(VulnerabilityScannerTool(workspace_root=workspace_dir))
     
     return agent
 
@@ -176,11 +178,12 @@ def cmd_chat(args: argparse.Namespace) -> int:
             print(f"Base URL: {args.base_url}")
             print("=" * 60)
             print("\nCommands:")
-            print("  /help     - Show available commands")
-            print("  /clear    - Clear conversation history")
-            print("  /tools    - List available tools")
-            print("  /plan     - Generate a plan for your request")
-            print("  /quit     - Exit the agent")
+            print("  /help           - Show available commands")
+            print("  /clear          - Clear conversation history")
+            print("  /tools          - List available tools")
+            print("  /plan           - Generate a plan for your request")
+            print("  /scan           - Scan for vulnerabilities and create remediation plan")
+            print("  /quit           - Exit the agent")
             print("\nEnter your request:\n")
             
             while True:
@@ -199,12 +202,13 @@ def cmd_chat(args: argparse.Namespace) -> int:
                     
                     if command == "/help":
                         print("\nAvailable commands:")
-                        print("  /help     - Show this help message")
-                        print("  /clear    - Clear conversation history")
-                        print("  /tools    - List available tools")
-                        print("  /plan     - Generate and review a plan")
-                        print("  /quit     - Exit the agent")
-                        print("  <text>    - Send a message to the agent\n")
+                        print("  /help           - Show this help message")
+                        print("  /clear          - Clear conversation history")
+                        print("  /tools          - List available tools")
+                        print("  /plan           - Generate and review a plan")
+                        print("  /scan           - Scan for vulnerabilities")
+                        print("  /quit           - Exit the agent")
+                        print("  <text>          - Send a message to the agent\n")
                     
                     elif command == "/clear":
                         agent.clear_context()
@@ -281,6 +285,112 @@ def cmd_chat(args: argparse.Namespace) -> int:
                                 print("\nPlan execution cancelled.\n")
                         else:
                             print("Failed to generate plan.\n")
+                    
+                    elif command == "/scan":
+                        # Vulnerability scanning and remediation workflow
+                        scan_args = user_input[6:].strip()
+                        path = "."
+                        file_pattern = "*.py"
+                        
+                        if scan_args:
+                            parts = scan_args.split()
+                            if len(parts) >= 1:
+                                path = parts[0]
+                            if len(parts) >= 2:
+                                file_pattern = parts[1]
+                        
+                        print(f"\n🔍 Scanning for vulnerabilities in {path} (pattern: {file_pattern})...")
+                        
+                        # Create remediator with agent's model config and tool registry
+                        remediator = VulnerabilityRemediator(
+                            model_config=model_config,
+                            tool_registry=agent.tool_registry
+                        )
+                        
+                        # Step 1: Scan for vulnerabilities
+                        loader = Loader("Scanning code...")
+                        loader.start()
+                        findings = remediator.scan_for_vulnerabilities(path=path, file_pattern=file_pattern)
+                        loader.stop()
+                        
+                        if not findings:
+                            print("\n✅ No vulnerabilities detected!\n")
+                        else:
+                            print(f"\n⚠️  Found {len(findings)} potential vulnerabilities.\n")
+                            
+                            # Step 2: Generate remediation plan
+                            print("Generating remediation plan...")
+                            loader = Loader("Creating plan...")
+                            loader.start()
+                            plan = remediator.generate_remediation_plan()
+                            loader.stop()
+                            
+                            # Step 3: Show plan to user for approval
+                            print("\n" + remediator.format_plan_for_display())
+                            
+                            # Step 4: Interactive loop for plan modification
+                            while True:
+                                try:
+                                    action = input("\nAction (toggle <n>, enable-all, disable-all, approve, cancel): ").strip().lower()
+                                except (EOFError, KeyboardInterrupt):
+                                    print("\nGoodbye!")
+                                    break
+                                
+                                if action.startswith("toggle"):
+                                    try:
+                                        index = int(action.split()[1]) - 1
+                                        new_status = remediator.toggle_plan_item(index)
+                                        status_text = "enabled" if new_status else "disabled"
+                                        print(f"Item {index + 1} {status_text}.")
+                                        print("\n" + remediator.format_plan_for_display())
+                                    except (IndexError, ValueError):
+                                        print("Usage: toggle <number>")
+                                
+                                elif action == "enable-all":
+                                    remediator.enable_all_items()
+                                    print("All items enabled.")
+                                    print("\n" + remediator.format_plan_for_display())
+                                
+                                elif action == "disable-all":
+                                    remediator.disable_all_items()
+                                    print("All items disabled.")
+                                    print("\n" + remediator.format_plan_for_display())
+                                
+                                elif action in ("approve", "run"):
+                                    # Get enabled items count
+                                    enabled_count = sum(1 for item in plan.items if item.enabled)
+                                    if enabled_count == 0:
+                                        print("\n⚠️  No items enabled. Please enable at least one item or use 'cancel'.")
+                                        continue
+                                    
+                                    print(f"\n🚀 Executing {enabled_count} selected fix(es)...")
+                                    
+                                    # Apply all enabled fixes
+                                    results = remediator.apply_all_enabled_fixes()
+                                    
+                                    success_count = sum(1 for v in results.values() if v)
+                                    fail_count = len(results) - success_count
+                                    
+                                    print(f"\n✅ Successfully applied {success_count} fix(es).")
+                                    if fail_count > 0:
+                                        print(f"❌ Failed to apply {fail_count} fix(es).")
+                                    
+                                    # Verify fixes
+                                    print("\nVerifying fixes...")
+                                    remaining = remediator.verify_fixes()
+                                    if remaining:
+                                        print(f"⚠️  {len(remaining)} vulnerability(ies) still remain.")
+                                    else:
+                                        print("✅ All selected vulnerabilities have been fixed!")
+                                    
+                                    break
+                                
+                                elif action == "cancel":
+                                    print("\nRemediation cancelled.\n")
+                                    break
+                                
+                                else:
+                                    print("Unknown action. Use: toggle <n>, enable-all, disable-all, approve, cancel")
                     
                     else:
                         print(f"Unknown command: {command}. Type /help for available commands.\n")
