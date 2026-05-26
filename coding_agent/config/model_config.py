@@ -23,7 +23,7 @@ class ModelConfig:
     base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", "http://localhost:11434/v1"))
     api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", "ollama"))
     model_name: str = field(default_factory=lambda: os.getenv("LLM_MODEL", "qwen2.5-coder:7b"))
-    max_tokens: int = 4096
+    max_tokens: int = 8128
     timeout: int = 120
     retry_count: int = 3
     stream: bool = True
