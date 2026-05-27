@@ -298,24 +298,108 @@ def cmd_chat(args: argparse.Namespace) -> int:
                                 
                                 # Create executor function that uses the agent
                                 def execute_plan_item(item) -> tuple[bool, str]:
-                                    """Execute a single plan item using the agent."""
+                                    """Execute a single plan item using the agent with verification."""
                                     try:
+                                        # Capture initial state for file operations
+                                        initial_state = {}
+                                        if item.tool_name in ('read_file', 'write_file', 'create_file'):
+                                            # Will verify file state after execution
+                                            pass
+                                        
                                         # Build request for this specific item, including original requirements
                                         item_request = f"""Original task: {plan_request}
 
-Current step to execute: {item.description}"""
+Current step to execute: {item.description}
+
+IMPORTANT: After completing this step, you MUST report:
+1. Whether the operation succeeded or failed
+2. The exact file path if you created/modified a file
+3. Any errors encountered
+4. DO NOT claim success if you did not actually perform the action"""
                                         if item.tool_name:
                                             item_request += f"\n\nUse the {item.tool_name} tool to complete this step."
                                         
+                                        # Get conversation context before
+                                        context_before = agent.get_context().get_messages()[-1] if agent.get_context().get_messages() else None
+                                        
                                         response = agent.run(item_request)
                                         
-                                        # Check if response indicates failure
-                                        if response.lower().startswith(("error:", "failed:", "i couldn't", "i cannot")):
-                                            return False, response
+                                        # Get conversation context after to see tool results
+                                        context_after = agent.get_context().get_messages()
                                         
-                                        return True, response
+                                        # Check tool execution results from context
+                                        tool_executed = False
+                                        tool_succeeded = False
+                                        tool_output = ""
+                                        
+                                        # Look for tool results in the conversation
+                                        for msg in context_after:
+                                            if hasattr(msg, 'role') and msg.role == 'tool':
+                                                tool_executed = True
+                                                tool_output = msg.content if hasattr(msg, 'content') else ""
+                                                tool_succeeded = "Error:" not in tool_output and "File not found" not in tool_output
+                                        
+                                        # Verify file operations actually happened
+                                        verification_result = ""
+                                        if item.tool_name == 'write_file':
+                                            # Try to extract file path from response or item description
+                                            import re
+                                            path_match = re.search(r'["\']([^"\']*\.py)["\']', response)
+                                            if path_match:
+                                                file_path = path_match.group(1)
+                                                from pathlib import Path
+                                                if Path(file_path).exists():
+                                                    verification_result = f"✓ Verified: File {file_path} exists"
+                                                    tool_succeeded = True
+                                                else:
+                                                    verification_result = f"✗ FAILED: File {file_path} does not exist"
+                                                    tool_succeeded = False
+                                            else:
+                                                verification_result = "⚠ Warning: Could not verify file creation (path not found in response)"
+                                        
+                                        elif item.tool_name == 'read_file':
+                                            # Check if tool actually returned content
+                                            if tool_output and len(tool_output.strip()) > 0 and "Error:" not in tool_output:
+                                                verification_result = "✓ Verified: File was read successfully"
+                                                tool_succeeded = True
+                                            else:
+                                                verification_result = "✗ FAILED: No file content returned"
+                                                tool_succeeded = False
+                                        
+                                        # Build comprehensive result report
+                                        result_report = []
+                                        result_report.append(f"Step: {item.description}")
+                                        result_report.append(f"Response: {response[:200]}...")
+                                        
+                                        if tool_executed:
+                                            result_report.append(f"Tool executed: Yes")
+                                            result_report.append(f"Tool succeeded: {tool_succeeded}")
+                                            if tool_output:
+                                                result_report.append(f"Tool output: {tool_output[:200]}...")
+                                        else:
+                                            result_report.append("Tool executed: No tool was called")
+                                        
+                                        if verification_result:
+                                            result_report.append(f"Verification: {verification_result}")
+                                        
+                                        full_report = "\n".join(result_report)
+                                        
+                                        # Determine final success based on actual verification
+                                        if tool_succeeded and (not verification_result or "✓" in verification_result):
+                                            return True, full_report
+                                        elif "✗ FAILED" in verification_result:
+                                            return False, full_report
+                                        elif response.lower().startswith(("error:", "failed:", "i couldn't", "i cannot")):
+                                            return False, full_report
+                                        elif not tool_executed and item.tool_name:
+                                            # LLM claimed to use tool but didn't
+                                            return False, f"{full_report}\n✗ CRITICAL: LLM did not call the required tool!"
+                                        else:
+                                            # Ambiguous case - return success but with warnings
+                                            return True, f"{full_report}\n⚠ Warning: Could not fully verify operation"
+                                            
                                     except Exception as e:
-                                        return False, str(e)
+                                        return False, f"Exception during execution: {str(e)}"
                                 
                                 # Execute plan with interactive failure handling
                                 loader = Loader("Executing plan...")
