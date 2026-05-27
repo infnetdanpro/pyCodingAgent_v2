@@ -645,6 +645,15 @@ The coding agent comes with a comprehensive set of built-in tools organized into
 | **jira_create** | `JiraCreateTool` | Create new issues in Jira |
 | **analyze_tasks** | `AnalyzeTasksTool` | Analyze and prioritize tasks from messaging platforms |
 
+### Git Operations Tools
+
+| Tool | Class | Description |
+|------|-------|-------------|
+| **git_diff** | `GitDiffTool` | Check git diff between current branch and main/master branch |
+| **git_commit** | `GitCommitTool` | Create a git commit with specified message |
+| **git_push** | `GitPushTool` | Push git commits to remote repository |
+| **git_pull_request** | `GitPullRequestTool` | Create pull requests on GitHub or GitLab |
+
 ### Tool Security
 
 All file system and shell tools operate within a configured `workspace_root` directory to prevent unauthorized access to sensitive files outside the project scope. Process tools track spawned processes and allow for proper cleanup.
@@ -725,6 +734,33 @@ result = tool.execute(
     description="Users unable to login with special characters in password",
     issuetype="Bug",
     priority="High"
+)
+```
+
+#### Git Operations
+```python
+from coding_agent.tools import GitDiffTool, GitCommitTool, GitPushTool, GitPullRequestTool
+
+# Check git diff against main/master branch
+tool = GitDiffTool()
+result = tool.execute()
+# Or specify base branch: result = tool.execute(base_branch="develop")
+
+# Create a commit
+tool = GitCommitTool()
+result = tool.execute(message="feat: add new feature", all_files=True)
+
+# Push to remote
+tool = GitPushTool()
+result = tool.execute(set_upstream=True)
+# Or specify remote and branch: result = tool.execute(remote="origin", branch="feature-branch")
+
+# Create a pull request (requires gh CLI for GitHub or glab CLI for GitLab)
+tool = GitPullRequestTool()
+result = tool.execute(
+    title="Add new feature",
+    body="This PR adds the new feature described in issue #123",
+    draft=False
 )
 ```
 
