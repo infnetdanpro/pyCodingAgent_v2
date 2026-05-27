@@ -163,9 +163,13 @@ Remember: Always use tool calls for actions, never output JSON directly in your 
                         logger.warning(f"Tool execution failed: {result.error}")
                     
                     # Print tool output to console for user visibility
-                    if result.output and result.output != "(no output)":
+                    # Always print tool results except when explicitly marked as "(no output)"
+                    if result.output != "(no output)":
                         print(f"\n[Tool: {tool_call.name}]")
-                        print(result.output)
+                        if result.output:
+                            print(result.output)
+                        else:
+                            print("(empty output)")
                         if not result.success and result.error:
                             print(f"[Error: {result.error}]")
                 
