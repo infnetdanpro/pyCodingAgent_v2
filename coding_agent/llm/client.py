@@ -258,6 +258,15 @@ class LLMClient:
                 if '"name"' in candidate and '"arguments"' in candidate:
                     matches.append(candidate)
         
+        # Pattern 4: Handle "Tool: name" + "Arguments: {...}" format (common in small LLM outputs)
+        # This format is seen when models output tool calls as structured text instead of JSON
+        if not matches:
+            tool_text_pattern = r'Tool:\s*(\w+)\s*\n\s*Arguments:\s*(\{[^}]+\})'
+            text_matches = re.findall(tool_text_pattern, content, re.DOTALL | re.IGNORECASE)
+            for tool_name, args_str in text_matches:
+                # Create a pseudo-JSON match that can be parsed below
+                matches.append(f'{{"name": "{tool_name}", "arguments": {args_str}}}')
+
         if not matches:
             return None
         
