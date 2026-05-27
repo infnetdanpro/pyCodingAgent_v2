@@ -117,6 +117,10 @@ class MyCustomTool(Tool):
 | `search_files` | Search files by glob pattern |
 | `run_command` | Execute shell commands |
 | `run_python` | Execute Python code snippets |
+| `git_diff` | Check git diff against main/master branch |
+| `git_commit` | Create a git commit with specified message |
+| `git_push` | Push git commits to remote repository |
+| `git_pull_request` | Create pull requests on GitHub or GitLab |
 
 ## Configuration
 

@@ -42,6 +42,13 @@ from .messaging import (
     AnalyzeTasksTool,
 )
 from .vulnerability_scanner import VulnerabilityScannerTool, VulnerabilityPatterns, ASTSecurityAnalyzer
+from .git import (
+    GitTools,
+    GitDiffTool,
+    GitCommitTool,
+    GitPushTool,
+    GitPullRequestTool,
+)
 
 __all__ = [
     "Tool",
@@ -84,4 +91,9 @@ __all__ = [
     "VulnerabilityScannerTool",
     "VulnerabilityPatterns",
     "ASTSecurityAnalyzer",
+    "GitTools",
+    "GitDiffTool",
+    "GitCommitTool",
+    "GitPushTool",
+    "GitPullRequestTool",
 ]
