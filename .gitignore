@@ -1,13 +1,10 @@
 ```
-# Python
+# Python compiled files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Testing
+# Test cache
 .pytest_cache/
-
-# Logs
-*.log
 ```
