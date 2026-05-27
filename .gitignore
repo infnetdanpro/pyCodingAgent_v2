@@ -1,10 +1,6 @@
-```
-# Python compiled files
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-
-# Test cache
-.pytest_cache/
-```
+.idea
+.DS_Store
+venv
+venv/*
