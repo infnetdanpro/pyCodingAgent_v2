@@ -300,10 +300,12 @@ def cmd_chat(args: argparse.Namespace) -> int:
                                 def execute_plan_item(item) -> tuple[bool, str]:
                                     """Execute a single plan item using the agent."""
                                     try:
-                                        # Build request for this specific item
-                                        item_request = f"Execute: {item.description}"
+                                        # Build request for this specific item, including original requirements
+                                        item_request = f"""Original task: {plan_request}
+
+Current step to execute: {item.description}"""
                                         if item.tool_name:
-                                            item_request += f" using the {item.tool_name} tool"
+                                            item_request += f"\n\nUse the {item.tool_name} tool to complete this step."
                                         
                                         response = agent.run(item_request)
                                         
