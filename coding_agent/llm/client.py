@@ -152,6 +152,8 @@ class LLMClient:
             "messages": [msg.to_dict() for msg in messages],
             "max_tokens": self.config.max_tokens,
             "stream": stream,
+            "temperature": self.config.temperature,
+            "top_p": self.config.top_p,
         }
 
         if tools:

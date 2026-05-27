@@ -83,36 +83,28 @@ class PlanMode:
         """
         logger.info(f"Generating plan for request: {user_request[:50]}...")
         
+        # For small models, use simpler prompts with explicit formatting instructions
         messages = [
             Message(role=Role.SYSTEM, content=system_prompt),
-            Message(role=Role.USER, content=f"""Analyze this request and create a detailed plan to accomplish it.
+            Message(role=Role.USER, content=f"""You are creating a step-by-step plan.
 
-User Request: {user_request}
+Task: {user_request}
 
 Available tools: {[t['function']['name'] for t in available_tools]}
 
-Respond with a structured plan in the following format:
-
-PLAN TITLE: <brief title>
-
-STEPS:
-1. <step description> [tool: <tool_name>]
-2. <step description> [tool: <tool_name>]
-3. <step description> [no tool needed - explanation]
-
-Each step should clearly describe what will be done and which tool (if any) will be used.
-Be specific about file paths, commands, or actions.
-
-Provide your response as a JSON object with this structure:
+Create a simple JSON plan with this exact format:
 {{
-    "title": "Plan title",
+    "title": "Short title",
     "steps": [
-        {{"description": "Step 1 description", "tool": "tool_name_or_null"}},
-        {{"description": "Step 2 description", "tool": "tool_name_or_null"}}
+        {{"description": "What to do", "tool": "tool_name or null"}},
+        {{"description": "Next step", "tool": "tool_name or null"}}
     ]
 }}
 
-Return ONLY the JSON object, no other text.""")
+Rules:
+- Keep steps short and clear
+- Use null for steps without tools
+- Return ONLY the JSON, no other text""")
         ]
         
         try:
