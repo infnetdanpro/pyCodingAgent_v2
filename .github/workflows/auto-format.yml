@@ -3,7 +3,7 @@ name: Auto Format with Black and Isort
 on:
   push:
     branches:
-      - '**'
+      - 'main'
 
 permissions:
   contents: write
