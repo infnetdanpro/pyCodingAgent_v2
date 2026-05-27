@@ -18,6 +18,8 @@ class ModelConfig:
         max_tokens: Maximum tokens in response.
         timeout: Request timeout in seconds.
         retry_count: Number of retries on failure.
+        temperature: Sampling temperature (0-2). Lower values (0.2-0.5) for deterministic tasks.
+        top_p: Nucleus sampling parameter (0-1). Alternative to temperature.
     """
 
     base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", "http://localhost:11434/v1"))
@@ -27,6 +29,8 @@ class ModelConfig:
     timeout: int = 10 * 60
     retry_count: int = 3
     stream: bool = True
+    temperature: float = 0.2  # Lower temperature for more deterministic output
+    top_p: float = 0.9  # Nucleus sampling parameter
 
     def __post_init__(self) -> None:
         """Validate model configuration."""
@@ -44,3 +48,9 @@ class ModelConfig:
 
         if self.retry_count < 0:
             raise ValueError("retry_count cannot be negative")
+
+        if not 0 <= self.temperature <= 2:
+            raise ValueError("temperature must be between 0 and 2")
+
+        if not 0 <= self.top_p <= 1:
+            raise ValueError("top_p must be between 0 and 1")

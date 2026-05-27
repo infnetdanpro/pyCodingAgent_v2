@@ -34,5 +34,18 @@ coverage/
 .venv/
 venv/
 ENV/
-env.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
 ```

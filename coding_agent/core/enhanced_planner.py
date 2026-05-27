@@ -392,42 +392,34 @@ class EnhancedPlanner:
         """
         logger.info(f"Generating hierarchical plan for: {user_request[:50]}...")
         
+        # For small models, use simpler prompts with concrete examples
         messages = [
             Message(role=Role.SYSTEM, content=system_prompt),
-            Message(role=Role.USER, content=f"""Analyze this complex task and create a hierarchical plan with multiple levels.
+            Message(role=Role.USER, content=f"""Create a simple phased plan for this task.
 
-User Request: {user_request}
+Task: {user_request}
 
-Available tools: {[t['function']['name'] for t in available_tools]}
+Tools: {[t['function']['name'] for t in available_tools]}
 
-Create a hierarchical plan breaking down the task into manageable steps.
-Organize steps into phases/groups (top level) with detailed sub-steps.
-
-Respond with a JSON object with this structure:
+Respond with JSON in this exact format:
 {{
     "title": "Plan title",
     "phases": [
         {{
-            "name": "Phase 1 name",
+            "name": "Phase name",
             "steps": [
-                {{"description": "Step description", "tool": "tool_name_or_null", "estimated_minutes": 5}},
-                ...
+                {{"description": "Step description", "tool": "tool_name or null", "estimated_minutes": 5}}
             ]
-        }},
-        ...
+        }}
     ],
-    "dependencies": [
-        {{"step": "step_description", "depends_on": ["other_step_description"]}}
-    ]
+    "dependencies": []
 }}
 
-Consider:
-- Group related steps into phases
-- Identify dependencies between steps
-- Estimate duration for each step
-- Mark which steps can run in parallel
-
-Return ONLY the JSON object.""")
+Rules:
+- Use 2-4 phases maximum
+- Keep step descriptions short
+- Use null for steps without tools
+- Return ONLY the JSON""")
         ]
         
         try:
