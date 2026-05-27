@@ -506,7 +506,8 @@ Rules:
         self,
         plan: HierarchicalPlan,
         executor: Callable[[PlanItem], tuple[bool, str]],
-        create_checkpoints: bool = True
+        create_checkpoints: bool = True,
+        interactive_on_failure: bool = False
     ) -> tuple[bool, str]:
         """Execute a plan with dependency tracking and optional checkpoints.
         
@@ -514,6 +515,8 @@ Rules:
             plan: The plan to execute.
             executor: Function to execute individual items. Returns (success, result/error).
             create_checkpoints: Whether to create checkpoints for rollback.
+            interactive_on_failure: If True, prompt user when a task fails to 
+                choose retry/cancel. If False, auto-retry until max_retries.
             
         Returns:
             Tuple of (success, message).
@@ -558,13 +561,35 @@ Rules:
                     item.mark_failed(result)
                     logger.error(f"Item {item.id} failed: {result}")
                     
-                    if item.should_retry():
-                        logger.info(f"Retrying item {item.id} (attempt {item.retry_count + 1})")
-                        item.increment_retry()
-                        continue
+                    # Handle failure based on mode
+                    if interactive_on_failure:
+                        # Show failure to user and get their decision
+                        print(f"\n❌ Task failed: {item.description}")
+                        print(f"   Error: {result}")
+                        print(f"   Attempt {item.retry_count + 1} of {item.max_retries + 1}")
+                        
+                        user_choice = self._prompt_user_on_failure(item)
+                        
+                        if user_choice == 'cancel':
+                            logger.info("User cancelled plan execution")
+                            return False, f"Plan cancelled by user after failure: {item.description}"
+                        elif user_choice == 'retry':
+                            logger.info(f"User chose to retry item {item.id}")
+                            item.increment_retry()
+                            continue
+                        elif user_choice == 'skip':
+                            logger.info(f"User chose to skip item {item.id}")
+                            item.status = PlanStatus.SKIPPED
+                            continue
                     else:
-                        # Max retries reached
-                        logger.error(f"Item {item.id} failed after {item.max_retries} retries")
+                        # Auto-retry mode
+                        if item.should_retry():
+                            logger.info(f"Retrying item {item.id} (attempt {item.retry_count + 1})")
+                            item.increment_retry()
+                            continue
+                        else:
+                            # Max retries reached
+                            logger.error(f"Item {item.id} failed after {item.max_retries} retries")
                 
                 # Call execution callback
                 if self._execution_callback:
@@ -576,6 +601,36 @@ Rules:
             return False, f"Plan completed with {len(failed)} failures"
         
         return True, "Plan executed successfully"
+    
+    def _prompt_user_on_failure(self, item: PlanItem) -> str:
+        """Prompt user for action when a task fails.
+        
+        Args:
+            item: The failed plan item.
+            
+        Returns:
+            User's choice: 'retry', 'skip', or 'cancel'.
+        """
+        while True:
+            try:
+                print("\nOptions:")
+                print("  [r] Retry this task")
+                print("  [s] Skip this task and continue")
+                print("  [c] Cancel the entire plan")
+                
+                choice = input("\nYour choice (r/s/c): ").strip().lower()
+                
+                if choice in ('r', 'retry'):
+                    return 'retry'
+                elif choice in ('s', 'skip'):
+                    return 'skip'
+                elif choice in ('c', 'cancel', 'q', 'quit'):
+                    return 'cancel'
+                else:
+                    print("Invalid choice. Please enter 'r', 's', or 'c'.")
+            except (EOFError, KeyboardInterrupt):
+                print("\n\nPlan execution interrupted.")
+                return 'cancel'
     
     def rollback_to_checkpoint(
         self,

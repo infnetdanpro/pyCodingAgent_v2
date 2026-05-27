@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 from coding_agent.config import ModelConfig, Settings
-from coding_agent.core import CodingAgent, PlanMode, VulnerabilityRemediator
+from coding_agent.core import CodingAgent, PlanMode, VulnerabilityRemediator, EnhancedPlanner, HierarchicalPlan, PlanStatus
 from coding_agent.tools import (
     ListDirTool,
     ReadFileTool,
@@ -240,7 +240,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
                         print()
                     
                     elif command == "/plan":
-                        # Plan mode workflow
+                        # Plan mode workflow with enhanced execution tracking
                         plan_request = user_input[6:].strip()
                         if not plan_request:
                             print("Usage: /plan <your request>")
@@ -254,22 +254,29 @@ def cmd_chat(args: argparse.Namespace) -> int:
                         system_prompt = context.system_prompt or "You are a helpful coding assistant."
                         available_tools = agent.tool_registry.get_all_schemas()
                         
-                        # Generate plan
+                        # Generate plan using EnhancedPlanner for better tracking
+                        planner = EnhancedPlanner(model_config)
                         loader = Loader("Generating plan...")
                         loader.start()
-                        plan = plan_mode.generate_plan(plan_request, system_prompt, available_tools)
+                        hierarchical_plan = planner.generate_hierarchical_plan(
+                            plan_request, 
+                            system_prompt, 
+                            available_tools
+                        )
                         loader.stop()
                         
-                        if plan:
-                            print(f"\n{plan}")
+                        if hierarchical_plan:
+                            # Display plan summary
+                            print("\n" + planner.get_plan_summary(hierarchical_plan))
                             
                             # Convert plan items to format expected by selector
                             plan_items = []
-                            for item in plan.items:
+                            for item in hierarchical_plan.get_executable_items():
                                 plan_items.append({
                                     'description': item.description,
                                     'tool_name': item.tool_name,
-                                    'enabled': True
+                                    'enabled': True,
+                                    'item_id': item.id
                                 })
                             
                             # Let user review and modify plan
@@ -278,26 +285,58 @@ def cmd_chat(args: argparse.Namespace) -> int:
                             if confirmed and enabled_items:
                                 print(f"\nExecuting {len(enabled_items)} selected plan items...\n")
                                 
-                                # Build execution request from enabled items
-                                execution_request = f"Execute the following plan steps:\n\n"
-                                for i, item in enumerate(enabled_items, 1):
-                                    execution_request += f"{i}. {item['description']}"
-                                    if item.get('tool_name'):
-                                        execution_request += f" [using {item['tool_name']}]"
-                                    execution_request += "\n"
+                                # Track execution results
+                                execution_results = []
+                                failed_items = []
                                 
-                                execution_request += "\nPlease execute these steps in order."
+                                # Set up callback for progress updates
+                                def on_item_status_change(item):
+                                    status_icon = "✓" if item.status == PlanStatus.COMPLETED else "✗" if item.status == PlanStatus.FAILED else "○"
+                                    print(f"  {status_icon} {item.description[:50]}... ({item.status.value})")
                                 
-                                try:
-                                    # Show loader while waiting for LLM response
-                                    loader = Loader("Executing plan...")
-                                    loader.start()
-                                    response = agent.run(execution_request)
-                                    loader.stop()
-                                    print("\n" + response + "\n")
-                                except Exception as e:
-                                    loader.stop()
-                                    print(f"\nError during execution: {e}\n")
+                                planner.set_execution_callback(on_item_status_change)
+                                
+                                # Create executor function that uses the agent
+                                def execute_plan_item(item) -> tuple[bool, str]:
+                                    """Execute a single plan item using the agent."""
+                                    try:
+                                        # Build request for this specific item
+                                        item_request = f"Execute: {item.description}"
+                                        if item.tool_name:
+                                            item_request += f" using the {item.tool_name} tool"
+                                        
+                                        response = agent.run(item_request)
+                                        
+                                        # Check if response indicates failure
+                                        if response.lower().startswith(("error:", "failed:", "i couldn't", "i cannot")):
+                                            return False, response
+                                        
+                                        return True, response
+                                    except Exception as e:
+                                        return False, str(e)
+                                
+                                # Execute plan with interactive failure handling
+                                loader = Loader("Executing plan...")
+                                loader.start()
+                                success, message = planner.execute_plan(
+                                    hierarchical_plan,
+                                    execute_plan_item,
+                                    create_checkpoints=True,
+                                    interactive_on_failure=True
+                                )
+                                loader.stop()
+                                
+                                print(f"\n{'='*60}")
+                                if success:
+                                    print("✅ Plan executed successfully!")
+                                else:
+                                    print(f"❌ {message}")
+                                
+                                # Show final plan status
+                                print("\nFinal Status:")
+                                print(planner.get_plan_summary(hierarchical_plan))
+                                print(f"{'='*60}\n")
+                                
                             elif confirmed:
                                 print("\nNo items selected for execution.\n")
                             else:
