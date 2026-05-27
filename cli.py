@@ -282,8 +282,20 @@ def cmd_chat(args: argparse.Namespace) -> int:
                             # Let user review and modify plan
                             confirmed, enabled_items = interactive_plan_selector(plan_items)
                             
-                            if confirmed and enabled_items:
-                                print(f"\nExecuting {len(enabled_items)} selected plan items...\n")
+                            if confirmed:
+                                # Update the hierarchical plan with user's selections
+                                # Mark deselected items as SKIPPED so they won't be executed
+                                for plan_item_dict in plan_items:
+                                    item_id = plan_item_dict.get('item_id')
+                                    enabled = plan_item_dict.get('enabled', False)
+                                    if not enabled and item_id:
+                                        actual_item = hierarchical_plan.get_item(item_id)
+                                        if actual_item:
+                                            actual_item.status = PlanStatus.SKIPPED
+                                
+                                enabled_count = len(enabled_items)
+                                if enabled_count > 0:
+                                    print(f"\nExecuting {enabled_count} selected plan items...\n")
                                 
                                 # Track execution results
                                 execution_results = []
