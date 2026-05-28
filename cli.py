@@ -55,12 +55,13 @@ class Loader:
             self._thread.join(timeout=0.5)
 
 
-def create_agent(workspace_dir: str, model_config: ModelConfig) -> CodingAgent:
+def create_agent(workspace_dir: str, model_config: ModelConfig, prepare_context: bool = True) -> CodingAgent:
     """Create and configure a coding agent instance.
     
     Args:
         workspace_dir: Root directory for file operations.
         model_config: LLM model configuration.
+        prepare_context: Whether to prepare session context before starting.
     
     Returns:
         Configured CodingAgent instance.
@@ -71,7 +72,7 @@ def create_agent(workspace_dir: str, model_config: ModelConfig) -> CodingAgent:
         log_level="INFO",
     )
     
-    agent = CodingAgent(settings=settings, model_config=model_config)
+    agent = CodingAgent(settings=settings, model_config=model_config, prepare_context=prepare_context)
     
     # Register default tools
     agent.register_tool(ReadFileTool(workspace_root=workspace_dir))
@@ -167,7 +168,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
     setup_logging(level=args.log_level)
     
     try:
-        with create_agent(str(workspace_dir), model_config) as agent:
+        with create_agent(str(workspace_dir), model_config, args.prepare_context) as agent:
             plan_mode = PlanMode(model_config)
             
             print("=" * 60)
@@ -598,7 +599,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     setup_logging(level=args.log_level)
     
     try:
-        with create_agent(str(workspace_dir), model_config) as agent:
+        with create_agent(str(workspace_dir), model_config, args.prepare_context) as agent:
             response = agent.run(args.command)
             print(response)
     
@@ -666,6 +667,19 @@ def main() -> int:
         default="INFO",
         help="Logging level (default: INFO)",
     )
+    chat_parser.add_argument(
+        "--prepare-context",
+        action="store_true",
+        default=True,
+        dest="prepare_context",
+        help="Prepare session context before starting (file list, OS info, dependencies, Python rules)",
+    )
+    chat_parser.add_argument(
+        "--no-prepare-context",
+        action="store_false",
+        dest="prepare_context",
+        help="Skip session context preparation",
+    )
     chat_parser.set_defaults(func=cmd_chat)
     
     # Run command
@@ -702,6 +716,19 @@ def main() -> int:
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         default="INFO",
         help="Logging level (default: INFO)",
+    )
+    run_parser.add_argument(
+        "--prepare-context",
+        action="store_true",
+        default=True,
+        dest="prepare_context",
+        help="Prepare session context before starting (file list, OS info, dependencies, Python rules)",
+    )
+    run_parser.add_argument(
+        "--no-prepare-context",
+        action="store_false",
+        dest="prepare_context",
+        help="Skip session context preparation",
     )
     run_parser.set_defaults(func=cmd_run)
     
