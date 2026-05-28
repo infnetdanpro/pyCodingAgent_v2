@@ -34,6 +34,7 @@ class CodingAgent:
         settings: Optional[Settings] = None,
         model_config: Optional[ModelConfig] = None,
         tool_registry: Optional[ToolRegistry] = None,
+        prepare_context: bool = True,
     ) -> None:
         """Initialize the coding agent.
 
@@ -41,15 +42,28 @@ class CodingAgent:
             settings: Agent settings. Uses defaults if not provided.
             model_config: LLM configuration. Uses defaults if not provided.
             tool_registry: Tool registry. Creates empty registry if not provided.
+            prepare_context: Whether to prepare session context before starting.
         """
         self.settings = settings or Settings()
         self.model_config = model_config or ModelConfig()
         self.tool_registry = tool_registry or ToolRegistry()
 
+        # Prepare session context if requested
+        session_context_str = None
+        if prepare_context:
+            from .session_context import prepare_session_context
+
+            session_ctx = prepare_session_context(
+                workspace_dir=self.settings.workspace_dir,
+                requirements_file="requirements.txt",
+            )
+            session_context_str = session_ctx.to_system_prompt()
+
         self._client = LLMClient(self.model_config)
         self._context = ConversationContext(
             max_length=self.settings.max_iterations,
             system_prompt=self._get_default_system_prompt(),
+            session_context=session_context_str,
         )
 
         if self.settings.enable_history:

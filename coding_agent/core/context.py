@@ -19,17 +19,23 @@ class ConversationContext:
         max_length: Maximum number of messages to retain.
         system_prompt: Optional system prompt for the conversation.
         history_file: Optional path for persisting conversation history.
+        session_context: Optional session context prepared before starting.
     """
 
     messages: list[Message] = field(default_factory=list)
     max_length: int = 100
     system_prompt: Optional[str] = None
     history_file: Optional[Path] = None
+    session_context: Optional[str] = None
 
     def __post_init__(self) -> None:
         """Initialize context after dataclass initialization."""
         if self.system_prompt:
             self.add_message(Message(role=Role.SYSTEM, content=self.system_prompt))
+
+        # Add session context as a system message if provided
+        if self.session_context:
+            self.add_message(Message(role=Role.SYSTEM, content=self.session_context))
 
         if self.history_file:
             self._load_history()
