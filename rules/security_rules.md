@@ -1,16 +1,16 @@
-# Security Rules
+# sec Rules
 
-## Authentication
-- Never hardcode credentials or API keys
-- Use environment variables for sensitive configuration
-- Implement rate limiting for authentication endpoints
+## auth
+- Never hardcode creds or API keys
+- Use env vars for sensitive config
+- impl rate limiting for auth endpoints
 
 ## Data Validation
-- Validate all user inputs before processing
+- Validate all user inputs b4 processing
 - Use parameterized queries to prevent SQL injection
 - Sanitize HTML output to prevent XSS attacks
 
-## File Operations
-- Validate file paths to prevent directory traversal
-- Check file permissions before reading/writing
-- Never execute user-provided file paths
+## File ops
+- Validate file paths to prevent dir traversal
+- Check file permissions b4 reading/writing
+- Never run user-provided file paths

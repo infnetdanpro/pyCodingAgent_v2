@@ -1,264 +1,245 @@
-# 🦫 Bobert Coding Agent Project
+# Bobert Coding Agent Project
 
-<div align="center">
+div align"center"
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-Active-success.svg)
+**A modular and scale coding agent architecture designed for on-device exec w/ local LLM models**
 
-**A modular and scalable coding agent architecture designed for on-device execution with local LLM models**
+/div
 
-</div>
-
----
-
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#-overview)
 - [Features](#-features)
 - [Project Structure](#-project-structure)
-- [Installation](#-installation)
+- [install](#-install)
 - [CLI Usage](#-cli-usage)
-  - [Plan Mode in CLI](#-plan-mode-in-cli)
-  - [CLI Options Reference](#-cli-options-reference)
+ - [Plan Mode in CLI](#-plan-mode-in-cli)
+ - [CLI Options Reference](#-cli-options-reference)
 - [Quick Start](#-quick-start)
-- [Usage Examples](#-usage-examples)
-  - [Plan Mode Example](#-example-7-plan-mode---structured-task-execution)
+- [Usage exs](#-usage-exs)
+ - [Plan Mode ex](#-ex-7-plan-mode---structured-task-exec)
 - [Plan Mode](#-plan-mode)
 - [Available Tools](#-available-tools)
-  - [File System Tools](#-file-system-tools)
-  - [Shell & Process Tools](#-shell--process-tools)
-  - [Browser Automation Tools](#-browser-automation-tools)
-  - [Messaging & Integration Tools](#-messaging--integration-tools)
-- [Configuration](#-configuration)
+ - [File sys Tools](#-file-sys-tools)
+ - [Shell Process Tools](#-shell--process-tools)
+ - [Browser Automation Tools](#-browser-automation-tools)
+ - [Messaging Integration Tools](#-messaging--integration-tools)
+- [config](#-config)
 - [Creating Custom Tools](#-creating-custom-tools)
 - [Design Principles](#-design-principles)
-- [Requirements](#-requirements)
+- [reqs](#-reqs)
 - [License](#-license)
 
----
+## Overview
 
-## 🎯 Overview
+The **Coding Agent** is a , modular AI assistant designed to help w/ software dev tasks. It leverages local Large Language Models (LLMs) thru OpenAI-compatible APIs, enabling privacy-focused, offline-capable code gen, file manipulation, and task automation.
 
-The **Coding Agent** is a powerful, modular AI assistant designed to help with software development tasks. It leverages local Large Language Models (LLMs) through OpenAI-compatible APIs, enabling privacy-focused, offline-capable code generation, file manipulation, and task automation.
-
-Built with clean architecture principles, the coding agent follows the **ReAct pattern** (Reasoning + Acting) to intelligently plan and execute complex development tasks by combining LLM reasoning with practical tool execution.
+Built w/ clean architecture principles, the coding agent follows the **ReAct pattern** (Reasoning Acting) to plan and run complex dev tasks by combining LLM reasoning w/ practical tool exec.
 
 ### Key Use Cases
 
-- 📝 **Code Generation**: Write new code files or functions
-- 🔍 **Code Analysis**: Read and understand existing codebases
-- 🛠️ **Refactoring**: Modify and improve existing code
-- 🧪 **Testing**: Execute code snippets and run tests
-- 📂 **File Management**: Navigate, read, and modify project files
-- 🖥️ **Automation**: Execute shell commands and scripts
+- **Code gen**: Write new code files or funcs
+- **Code Analysis**: Read and understand existing codebases
+- **Refactoring**: Modify and improve existing code
+- **Testing**: run code snippets and run tests
+- **File Management**: Navigate, read, and modify project files
+- **Automation**: run shell commands and scripts
 
----
+## Features
 
-## ✨ Features
+| Feature | desc |
+| ** OpenAI-Compatible API** | Works w/ local models like Qwen2.5-Coder via Ollama, LM Studio, or any OpenAI-compatible endpoint |
+| ** Modular Tool sys** | Easy-to-extend architecture for adding custom tools and caps |
+| ** ReAct Pattern** | Advanced reasoning and acting loop for complex task completion |
+| ** Conversation History** | persist context across sessions for continuous workflows |
+| ** Well Documented** | complete docstrings follow Google Style Guide |
+| ** Clean Architecture** | KISS and DRY principles for maintainable code |
+| ** Privacy-1st** | Runs entirely locally w/ no external API deps req |
+| ** Type-Safe** | Full type hints throughout the codebase |
 
-| Feature | Description |
-|---------|-------------|
-| **🔌 OpenAI-Compatible API** | Works seamlessly with local models like Qwen2.5-Coder via Ollama, LM Studio, or any OpenAI-compatible endpoint |
-| **🧩 Modular Tool System** | Easy-to-extend architecture for adding custom tools and capabilities |
-| **🔄 ReAct Pattern** | Advanced reasoning and acting loop for complex task completion |
-| **💾 Conversation History** | Persistent context across sessions for continuous workflows |
-| **📚 Well Documented** | Comprehensive docstrings following Google Style Guide |
-| **🎨 Clean Architecture** | KISS and DRY principles for maintainable code |
-| **🔒 Privacy-First** | Runs entirely locally with no external API dependencies required |
-| **⚡ Type-Safe** | Full type hints throughout the codebase |
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 /workspace/
-├── coding_agent/              # Main package directory
-│   ├── __init__.py           # Package initialization
-│   ├── README.md             # Package-specific documentation
-│   ├── requirements.txt      # Python dependencies
-│   │
-│   ├── config/               # Configuration modules
-│   │   ├── __init__.py
-│   │   ├── settings.py       # Agent settings and configuration
-│   │   └── model_config.py   # LLM model configuration
-│   │
-│   ├── core/                 # Core agent logic
-│   │   ├── __init__.py
-│   │   ├── agent.py          # Main CodingAgent class
-│   │   └── context.py        # Conversation context management
-│   │
-│   ├── llm/                  # LLM client implementation
-│   │   ├── __init__.py
-│   │   ├── client.py         # OpenAI-compatible client
-│   │   └── message.py        # Message and role definitions
-│   │
-│   ├── tools/                # Tool implementations
-│   │   ├── __init__.py
-│   │   ├── base.py           # Base tool classes and registry
-│   │   ├── filesystem.py     # File system operations
-│   │   └── shell.py          # Shell command execution
-│   │
-│   ├── utils/                # Utility functions
-│   │   ├── __init__.py
-│   │   └── logging_config.py # Logging setup
-│   │
-│   └── examples/             # Usage examples
-│       ├── basic_usage.py    # Interactive agent example
-│       └── custom_tools.py   # Custom tool demonstration
-│
-└── README.md                 # This file - Project overview
+ coding_agent/ # Main pkg dir
+ __init__.py # pkg init
+ README.md # pkg-specific documentation
+ reqs.txt # Python deps
+
+ config/ # config mods
+ __init__.py
+ settings.py # Agent settings and config
+ model_config.py # LLM model config
+
+ core/ # Core agent logic
+ __init__.py
+ agent.py # Main CodingAgent class
+ context.py # Conversation context management
+
+ llm/ # LLM client impl
+ __init__.py
+ client.py # OpenAI-compatible client
+ msg.py # msg and role definitions
+
+ tools/ # Tool implementations
+ __init__.py
+ base.py # Base tool classes and registry
+ filesystem.py # File sys ops
+ shell.py # Shell command exec
+
+ utils/ # Utility funcs
+ __init__.py
+ logging_config.py # Logging setup
+
+ exs/ # Usage exs
+ basic_usage.py # Interactive agent ex
+ custom_tools.py # Custom tool demonstration
+
+ README.md # This file - Project overview
 ```
 
----
-
-## 🚀 Installation
+## install
 
 ### Prerequisites
 
-- **Python 3.10+** recommended
-- **Local LLM** (optional but recommended for offline use)
+- **Python 3.10** recommended
+- **Local LLM** (opt but recommended for offline use)
 
 ### Step 1: Install from GitHub
 
-```bash
-# Create and activate virtual environment
+```
+# mk and activate virtual env
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate # On Windows: venv\Scripts\activate
 
-# Install directly from GitHub repository
-pip install git+https://github.com/yourusername/coding-agent.git
+# Install directly from GitHub repo
+pip install githttps://github.com/yourusername/coding-agent.git
 ```
 
-### Step 2: Initialize Your Project Directory
+### Step 2: init Your Project dir
 
-```bash
-# Initialize current directory
+```
+# init curr dir
 agent init
 
-# Or initialize a specific directory
+# Or init a specific dir
 agent init /path/to/your/project
 ```
 
 This creates:
-- `.agent_config.json` - Configuration file for the agent
+- `.agent_config.json` - config file for the agent
 - `.gitignore` - Pre-configured to ignore agent history and cache files
 
 ### Step 3: Setup Local LLM (Recommended)
 
 Install [Ollama](https://ollama.ai/) for local model inference:
 
-```bash
+```
 # Install Ollama (Linux/Mac)
 curl -fsSL https://ollama.ai/install.sh | sh
 
 # Pull a coding-optimized model
 ollama pull qwen2.5-coder:7b
 
-# Start Ollama server (usually auto-starts)
+# Start Ollama server (usu auto-starts)
 ollama serve
 ```
 
 Alternative models you can use:
 - `codellama:7b` - General purpose coding model
-- `deepseek-coder:6.7b` - Specialized for code generation
+- `deepseek-coder:6.7b` - Specialized for code gen
 - `starcoder2:7b` - Multi-language code model
 
----
+## CLI Usage
 
-## 💻 CLI Usage
+The coding agent provides a command-line iface for easy interaction.
 
-The coding agent provides a command-line interface for easy interaction.
+### init a Project
 
-### Initialize a Project
-
-```bash
-# Initialize current directory
+```
+# init curr dir
 agent init
 
-# Initialize a specific directory
+# init a specific dir
 agent init /path/to/project
 ```
 
 ### Start Interactive Chat
 
-```bash
-# Start chat in current directory
+```
+# Start chat in curr dir
 agent chat
 
-# Specify workspace directory
+# Specify workspace dir
 agent chat -w /path/to/project
 
-# Use custom model configuration
+# Use custom model config
 agent chat --model codellama:7b --base-url http://localhost:11434/v1
 ```
 
 ### Run Single Command
 
-```bash
-# Execute a single task
-agent run "List all Python files in the current directory"
+```
+# run a single task
+agent run "List all Python files in the curr dir"
 
-# With custom workspace
-agent run "Create a README.md file" -w /path/to/project
+# w/ custom workspace
+agent run "mk a README.md file" -w /path/to/project
 ```
 
 ### CLI Commands Reference
 
-| Command | Description |
-|---------|-------------|
-| `agent init [dir]` | Initialize a directory for use with the agent |
+| Command | desc |
+| `agent init [dir]` | init a dir for use w/ the agent |
 | `agent chat` | Start interactive chat session |
-| `agent run "command"` | Execute a single command |
+| `agent run "command"` | run a single command |
 
 ### In-Chat Commands
 
 When using `agent chat`, you can use these special commands:
 
-| Command | Description |
-|---------|-------------|
+| Command | desc |
 | `/help` | Show available commands |
 | `/clear` | Clear conversation history |
 | `/tools` | List available tools |
-| `/plan <request>` | Generate and execute a plan for your request |
+| `/plan req` | gen and run a plan for your req |
 | `/quit` | Exit the chat session |
 
 ### Plan Mode in CLI
 
-The `/plan` command in interactive chat allows you to generate, review, and execute plans:
+The `/plan` command in interactive chat allows you to gen, review, and run plans:
 
-```bash
-$ agent chat
+```
+ agent chat
 
-> /plan Create a Flask API with user authentication
+ /plan mk a Flask API w/ user auth
 
 Generating plan...
 
-Plan: Create Flask API with Authentication
-  1. [☐] Create project directory structure
-  2. [☐] Install Flask and dependencies
-  3. [☐] Create app.py with basic Flask setup
-  4. [☐] Implement user registration endpoint
-  5. [☐] Implement login/logout endpoints
-  6. [☐] Add password hashing with bcrypt
-  7. [☐] Create database models
-  8. [☐] Write basic tests
+Plan: mk Flask API w/ auth
+ 1. [] mk project dir structure
+ 2. [] Install Flask and deps
+ 3. [] mk app.py w/ basic Flask setup
+ 4. [] impl user registration endpoint
+ 5. [] impl login/logout endpoints
+ 6. [] Add password hashing w/ bcrypt
+ 7. [] mk db models
+ 8. [] Write basic tests
 
-Select plan items to execute (or press Enter to execute all):
-> _
+Select plan items to run (or press Enter to run all):
+ _
 ```
 
-You can then select which steps to execute by toggling them on/off before confirmation.
+You can then select which steps to run by toggling them on/off b4 confirmation.
 
-### Complete CLI Workflow Example
+### Complete CLI Workflow ex
 
-```bash
-# 1. Initialize a new project directory
+```
+# 1. init a new project dir
 agent init my-flask-app
 cd my-flask-app
 
-# 2. Create virtual environment
+# 2. mk virtual env
 python -m venv venv
 source venv/bin/activate
 
@@ -266,42 +247,42 @@ source venv/bin/activate
 agent chat --model qwen2.5-coder:7b
 
 # In the chat session:
-# > Create a Flask application with a hello world endpoint
-# > Add a /users endpoint that returns a list of users
-# > /plan Add user authentication with JWT tokens
-# > /quit
+# mk a Flask app w/ a hello world endpoint
+# Add a /users endpoint that returns a list of users
+# /plan Add user auth w/ JWT tokens
+# /quit
 
 # 4. Or run a single command non-interactively
-agent run "Add type hints to all functions in app.py"
+agent run "Add type hints to all funcs in app.py"
 ```
 
 ### Advanced CLI Usage
 
-#### Custom Model Configuration
+#### Custom Model config
 
-```bash
+```
 # Use OpenAI GPT-4
 agent chat \
-  --base-url https://api.openai.com/v1 \
-  --api-key $OPENAI_API_KEY \
-  --model gpt-4-turbo-preview
+ --base-url https://api.openai.com/v1 \
+ --api-key OPENAI_API_KEY \
+ --model gpt-4-turbo-preview
 
 # Use Anthropic Claude via proxy
 agent chat \
-  --base-url https://your-claude-proxy.com/v1 \
-  --api-key $ANTHROPIC_API_KEY \
-  --model claude-3-opus-20240229
+ --base-url https://your-claude-proxy.com/v1 \
+ --api-key ANTHROPIC_API_KEY \
+ --model claude-3-opus-20240229
 ```
 
-#### Debugging with Verbose Logging
+#### Debugging w/ Verbose Logging
 
-```bash
+```
 # Enable DEBUG logging to see detailed agent reasoning
 agent chat --log-level DEBUG
 
 # Logs will show:
-# - LLM requests and responses
-# - Tool execution details
+# - LLM reqs and resps
+# - Tool exec details
 # - Agent decision-making process
 ```
 
@@ -309,268 +290,261 @@ agent chat --log-level DEBUG
 
 #### Global Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
+| Option | desc | def |
 | `--base-url` | LLM API base URL | `http://localhost:11434/v1` |
 | `--api-key` | LLM API key | `ollama` |
 | `--model` | LLM model name | `qwen2.5-coder:7b` |
-| `--log-level` | Logging level (DEBUG/INFO/WARNING/ERROR) | `INFO` |
-| `-w, --workspace` | Workspace directory | Current directory |
+| `--log-level` | Logging level (DEBUG/INFO/warn/ERROR) | `INFO` |
+| `-w, --workspace` | Workspace dir | curr dir |
 
-#### Environment Variables
+#### env vars
 
-You can configure defaults using environment variables:
+You can configure defs using env vars:
 
-```bash
-export LLM_BASE_URL=http://localhost:11434/v1
-export LLM_API_KEY=your-api-key
-export LLM_MODEL=qwen2.5-coder:7b
+```
+export LLM_BASE_URLhttp://localhost:11434/v1
+export LLM_API_KEYyour-api-key
+export LLM_MODELqwen2.5-coder:7b
 ```
 
----
+## Quick Start
 
-## ⚡ Quick Start
+### Basic Usage ex
 
-### Basic Usage Example
+Here's a minimal ex to get started:
 
-Here's a minimal example to get started:
-
-```python
+```
 from coding_agent.config import ModelConfig, Settings
 from coding_agent.core import CodingAgent
 from coding_agent.tools import ReadFileTool, WriteFileTool, ListDirTool
 from coding_agent.utils import setup_logging
 
 # Setup logging
-setup_logging(level="INFO")
+setup_logging(level"INFO")
 
 # Configure settings
-settings = Settings(workspace_dir=".")
+settings Settings(workspace_dir".")
 
 # Configure model connection
-model_config = ModelConfig(
-    base_url="http://localhost:11434/v1",  # Ollama default endpoint
-    api_key="ollama",                       # Dummy key for local models
-    model_name="qwen2.5-coder:7b",          # Model to use
+model_config ModelConfig(
+ base_url"http://localhost:11434/v1", # Ollama def endpoint
+ api_key"ollama", # Dummy key for local models
+ model_name"qwen2.5-coder:7b", # Model to use
 )
 
-# Create and run agent
-with CodingAgent(settings=settings, model_config=model_config) as agent:
-    # Register tools
-    agent.register_tool(ReadFileTool())
-    agent.register_tool(WriteFileTool())
-    agent.register_tool(ListDirTool())
-    
-    # Run a task
-    response = agent.run("List all Python files in the current directory")
-    print(response)
+# mk and run agent
+w/ CodingAgent(settingssettings, model_configmodel_config) as agent:
+ # Register tools
+ agent.register_tool(ReadFileTool())
+ agent.register_tool(WriteFileTool())
+ agent.register_tool(ListDirTool())
+
+ # Run a task
+ resp agent.run("List all Python files in the curr dir")
+ print(resp)
 ```
 
-### Run the Interactive Example
+### Run the Interactive ex
 
-```bash
+```
 cd /workspace
-python -m coding_agent.examples.basic_usage
+python -m coding_agent.exs.basic_usage
 ```
 
-This launches an interactive REPL where you can chat with the agent and give it tasks.
+This launches an interactive REPL where you can chat w/ the agent and give it tasks.
 
----
+## Usage exs
 
-## 💡 Usage Examples
+### ex 1: File ops
 
-### Example 1: File Operations
-
-```python
+```
 from coding_agent.core import CodingAgent
 from coding_agent.tools import ReadFileTool, WriteFileTool
 
-with CodingAgent() as agent:
-    agent.register_tool(ReadFileTool())
-    agent.register_tool(WriteFileTool())
-    
-    # Create a new file
-    response = agent.run(
-        "Create a new Python file called 'hello.py' that prints 'Hello, World!'"
-    )
-    print(response)
-    
-    # Read the file to verify
-    response = agent.run("Read the contents of hello.py")
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(ReadFileTool())
+ agent.register_tool(WriteFileTool())
+
+ # mk a new file
+ resp agent.run(
+ "mk a new Python file called 'hello.py' that prints 'Hello, World!'"
+ )
+ print(resp)
+
+ # Read the file to verify
+ resp agent.run("Read the contents of hello.py")
+ print(resp)
 ```
 
-### Example 2: Code Analysis
+### ex 2: Code Analysis
 
-```python
+```
 from coding_agent.tools import ReadFileTool, SearchFilesTool, ListDirTool
 
-with CodingAgent() as agent:
-    agent.register_tool(ReadFileTool())
-    agent.register_tool(SearchFilesTool())
-    agent.register_tool(ListDirTool())
-    
-    # Analyze project structure
-    response = agent.run(
-        "Find all Python files containing 'class' definition and summarize their purpose"
-    )
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(ReadFileTool())
+ agent.register_tool(SearchFilesTool())
+ agent.register_tool(ListDirTool())
+
+ # Analyze project structure
+ resp agent.run(
+ "Find all Python files containing 'class' definition and summarize their purpose"
+ )
+ print(resp)
 ```
 
-### Example 3: Automated Testing
+### ex 3: auto Testing
 
-```python
+```
 from coding_agent.tools import RunPythonTool, WriteFileTool
 
-with CodingAgent() as agent:
-    agent.register_tool(RunPythonTool())
-    agent.register_tool(WriteFileTool())
-    
-    # Create and test a function
-    response = agent.run(
-        "Create a function that calculates factorial, then test it with input 5"
-    )
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(RunPythonTool())
+ agent.register_tool(WriteFileTool())
+
+ # mk and test a func
+ resp agent.run(
+ "mk a func that calculates factorial, then test it w/ input 5"
+ )
+ print(resp)
 ```
 
-### Example 4: Shell Commands
+### ex 4: Shell Commands
 
-```python
+```
 from coding_agent.tools import RunCommandTool
 
-with CodingAgent() as agent:
-    agent.register_tool(RunCommandTool())
-    
-    # Execute git commands
-    response = agent.run(
-        "Check git status and show the last 5 commits"
-    )
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(RunCommandTool())
+
+ # run git commands
+ resp agent.run(
+ "Check git status and show the last 5 commits"
+ )
+ print(resp)
 ```
 
-### Example 5: Process Management
+### ex 5: Process Management
 
-```python
+```
 from coding_agent.tools import StartProcessTool, ListProcessesTool, StopProcessTool
 
-with CodingAgent() as agent:
-    agent.register_tool(StartProcessTool())
-    agent.register_tool(ListProcessesTool())
-    agent.register_tool(StopProcessTool())
-    
-    # Start a web server in background
-    response = agent.run(
-        "Start a Python HTTP server on port 8000 in the background"
-    )
-    print(response)
-    
-    # List running processes
-    response = agent.run("List all running processes")
-    print(response)
-    
-    # Stop the server when done
-    response = agent.run("Stop the HTTP server process")
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(StartProcessTool())
+ agent.register_tool(ListProcessesTool())
+ agent.register_tool(StopProcessTool())
+
+ # Start a web server in background
+ resp agent.run(
+ "Start a Python HTTP server on port 8000 in the background"
+ )
+ print(resp)
+
+ # List running processes
+ resp agent.run("List all running processes")
+ print(resp)
+
+ # Stop the server when done
+ resp agent.run("Stop the HTTP server process")
+ print(resp)
 ```
 
-### Example 6: Browser Automation
+### ex 6: Browser Automation
 
-```python
+```
 from coding_agent.tools import (
-    BrowserNavigateTool, 
-    BrowserScreenshotTool, 
-    BrowserGetContentTool
+ BrowserNavigateTool,
+ BrowserScreenshotTool,
+ BrowserGetContentTool
 )
 
-with CodingAgent() as agent:
-    agent.register_tool(BrowserNavigateTool())
-    agent.register_tool(BrowserScreenshotTool())
-    agent.register_tool(BrowserGetContentTool())
-    
-    # Navigate and capture content
-    response = agent.run(
-        "Navigate to https://example.com, take a screenshot, and extract the main content"
-    )
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(BrowserNavigateTool())
+ agent.register_tool(BrowserScreenshotTool())
+ agent.register_tool(BrowserGetContentTool())
+
+ # Navigate and capture content
+ resp agent.run(
+ "Navigate to https://ex.com, take a screenshot, and extract the main content"
+ )
+ print(resp)
 ```
 
-### Example 7: Plan Mode - Structured Task Execution
+### ex 7: Plan Mode - Structured Task exec
 
-Plan Mode allows you to generate a detailed plan first, review and modify it, then execute the approved steps:
+Plan Mode allows you to gen a detailed plan 1st, review and modify it, then run the approved steps:
 
-```python
+```
 from coding_agent.core import CodingAgent, PlanMode
 from coding_agent.config import ModelConfig
 from coding_agent.tools import ReadFileTool, WriteFileTool, RunCommandTool
 
 # Setup
-model_config = ModelConfig(
-    base_url="http://localhost:11434/v1",
-    api_key="ollama",
-    model_name="qwen2.5-coder:7b"
+model_config ModelConfig(
+ base_url"http://localhost:11434/v1",
+ api_key"ollama",
+ model_name"qwen2.5-coder:7b"
 )
 
-with CodingAgent() as agent:
-    agent.register_tool(ReadFileTool())
-    agent.register_tool(WriteFileTool())
-    agent.register_tool(RunCommandTool())
-    
-    # Initialize plan mode
-    plan_mode = PlanMode(model_config)
-    
-    # Generate a plan for a complex task
-    plan_request = "Create a Python package with setup.py, README.md, and a basic module structure"
-    
-    # Get system prompt and available tools
-    context = agent.get_context()
-    system_prompt = context.system_prompt
-    available_tools = agent.tool_registry.get_all_schemas()
-    
-    # Generate plan
-    plan = plan_mode.generate_plan(plan_request, system_prompt, available_tools)
-    
-    # Review the plan
-    print(plan)
-    # Output:
-    # Plan: Create Python Package Structure
-    #   1. [☐] Create directory structure: mypackage/__init__.py
-    #   2. [☐] Create setup.py with package metadata
-    #   3. [☐] Create README.md with project description
-    #   4. [☐] Create example module file
-    
-    # Enable/disable specific plan items as needed
-    plan_mode.toggle_plan_item(index=2)  # Disable README creation for now
-    
-    # Execute the enabled plan items
-    enabled_items = plan.get_enabled_items()
-    print(f"Executing {len(enabled_items)} steps...")
-    
-    # Agent will execute the enabled steps in sequence
-    for item in enabled_items:
-        response = agent.run(f"Execute: {item.description}")
-        print(response)
-        item.completed = True
-    
-    print("Plan execution complete!")
+w/ CodingAgent() as agent:
+ agent.register_tool(ReadFileTool())
+ agent.register_tool(WriteFileTool())
+ agent.register_tool(RunCommandTool())
+
+ # init plan mode
+ plan_mode PlanMode(model_config)
+
+ # gen a plan for a complex task
+ plan_request "mk a Python pkg w/ setup.py, README.md, and a basic mod structure"
+
+ # Get sys prompt and available tools
+ context agent.get_context()
+ system_prompt context.system_prompt
+ available_tools agent.tool_registry.get_all_schemas()
+
+ # gen plan
+ plan plan_mode.generate_plan(plan_request, system_prompt, available_tools)
+
+ # Review the plan
+ print(plan)
+ # Output:
+ # Plan: mk Python pkg Structure
+ # 1. [] mk dir structure: mypackage/__init__.py
+ # 2. [] mk setup.py w/ pkg metadata
+ # 3. [] mk README.md w/ project desc
+ # 4. [] mk ex mod file
+
+ # Enable/disable specific plan items as needed
+ plan_mode.toggle_plan_item(index2) # Disable README mk for now
+
+ # run the enabled plan items
+ enabled_items plan.get_enabled_items()
+ print(f"Executing {len(enabled_items)} steps...")
+
+ # Agent will run the enabled steps in sequence
+ for item in enabled_items:
+ resp agent.run(f"run: {item.desc}")
+ print(resp)
+ item.completed True
+
+ print("Plan exec complete!")
 ```
 
----
+## Plan Mode
 
-## 🎯 Plan Mode
-
-Plan Mode is a powerful feature that separates planning from execution, giving you full control over complex tasks.
+Plan Mode is a feature that separates planning from exec, giving you full control over complex tasks.
 
 ### How Plan Mode Works
 
-1. **Generate Plan**: The LLM analyzes your request and creates a structured plan with discrete steps
-2. **Review & Modify**: You can review each step, enable/disable specific items, or reorder them
-3. **Execute**: Only the enabled steps are executed in sequence
+1. **gen Plan**: The LLM analyzes your req and creates a structured plan w/ discrete steps
+2. **Review Modify**: You can review each step, enable/disable specific items, or reorder them
+3. **run**: Only the enabled steps are executed in sequence
 4. **Track Progress**: Each completed step is marked, allowing you to track progress
 
 ### Benefits of Plan Mode
 
-- **Transparency**: See exactly what the agent plans to do before it does it
-- **Control**: Disable risky steps or reorganize the execution order
+- **Transparency**: See exactly what the agent plans to do b4 it does it
+- **Control**: Disable risky steps or reorganize the exec order
 - **Debugging**: Easier to identify where things went wrong in a multi-step task
 - **Learning**: Understand the agent's reasoning and decision-making process
 
@@ -579,188 +553,181 @@ Plan Mode is a powerful feature that separates planning from execution, giving y
 The `PlanMode` class consists of:
 
 - **`Plan`**: Container for the plan title and list of items
-- **`PlanItem`**: Individual step with description, optional tool assignment, and enabled/completed status
-- **`generate_plan()`**: Creates a plan from user request using LLM
+- **`PlanItem`**: single step w/ desc, opt tool assignment, and enabled/completed status
+- **`generate_plan()`**: Creates a plan from user req using LLM
 - **`toggle_plan_item()`**: Enable/disable specific steps
 - **`get_current_plan()`**: Retrieve the active plan
 
 ### When to Use Plan Mode
 
-Plan Mode is especially useful for:
+Plan Mode is esp useful for:
 
 - Complex multi-file refactoring tasks
-- Database migrations or schema changes
-- Deployments with multiple steps
+- db migrations or schema changes
+- Deployments w/ multiple steps
 - Tasks requiring user approval at each stage
 - Learning and understanding the agent's approach
 
----
+## Available Tools
 
-## 🛠️ Available Tools
+The coding agent comes w/ a complete set of built-in tools organized into several categories:
 
-The coding agent comes with a comprehensive set of built-in tools organized into several categories:
+### File sys Tools
 
-### File System Tools
-
-| Tool | Class | Description |
-|------|-------|-------------|
-| **read_file** | `ReadFileTool` | Read contents of a file with optional line range |
+| Tool | Class | desc |
+| **read_file** | `ReadFileTool` | Read contents of a file w/ opt line range |
 | **write_file** | `WriteFileTool` | Write content to a file (creates or overwrites) |
-| **list_dir** | `ListDirTool` | List directory contents with file details (type, size, modified time) |
+| **list_dir** | `ListDirTool` | List dir contents w/ file details (type, size, modified time) |
 | **search_files** | `SearchFilesTool` | Search files by glob pattern (e.g., `*.py`, `**/*.md`) |
-| **get_tree** | `GetTreeTool` | Get a tree view of directory structure |
+| **get_tree** | `GetTreeTool` | Get a tree view of dir structure |
 
-### Shell & Process Tools
+### Shell Process Tools
 
-| Tool | Class | Description |
-|------|-------|-------------|
-| **run_command** | `RunCommandTool` | Execute shell commands safely within workspace |
-| **run_python** | `RunPythonTool` | Execute Python code snippets in isolated environment |
+| Tool | Class | desc |
+| **run_command** | `RunCommandTool` | run shell commands safely w/in workspace |
+| **run_python** | `RunPythonTool` | run Python code snippets in isolated env |
 | **start_process** | `StartProcessTool` | Start a long-running process in the background |
 | **stop_process** | `StopProcessTool` | Stop a previously started process by PID |
 | **list_processes** | `ListProcessesTool` | List all processes started by the agent |
-| **get_process_info** | `GetProcessInfoTool` | Get detailed information about a specific process |
+| **get_process_info** | `GetProcessInfoTool` | Get detailed info about a specific process |
 
 ### Browser Automation Tools
 
-| Tool | Class | Description |
-|------|-------|-------------|
+| Tool | Class | desc |
 | **browser_navigate** | `BrowserNavigateTool` | Navigate to a URL in a headless browser |
 | **browser_click** | `BrowserClickTool` | Click on an element identified by CSS selector |
-| **browser_fill** | `BrowserFillTool` | Fill a form field with text |
-| **browser_screenshot** | `BrowserScreenshotTool` | Take a screenshot of the current page |
-| **browser_get_content** | `BrowserGetContentTool` | Extract text content from the current page |
-| **browser_evaluate** | `BrowserEvaluateTool` | Execute JavaScript in the browser context |
+| **browser_fill** | `BrowserFillTool` | Fill a form field w/ text |
+| **browser_screenshot** | `BrowserScreenshotTool` | Take a screenshot of the curr page |
+| **browser_get_content** | `BrowserGetContentTool` | Extract text content from the curr page |
+| **browser_evaluate** | `BrowserEvaluateTool` | run JavaScript in the browser context |
 | **browser_close** | `BrowserCloseTool` | Close the browser session |
 
-### Messaging & Integration Tools
+### Messaging Integration Tools
 
-| Tool | Class | Description |
-|------|-------|-------------|
-| **slack_receive** | `SlackReceiveTool` | Receive messages from Slack channels |
-| **slack_send** | `SlackSendTool` | Send messages to Slack channels |
-| **telegram_receive** | `TelegramReceiveTool` | Receive messages from Telegram chats |
-| **telegram_send** | `TelegramSendTool` | Send messages to Telegram chats |
+| Tool | Class | desc |
+| **slack_receive** | `SlackReceiveTool` | Receive msgs from Slack channels |
+| **slack_send** | `SlackSendTool` | Send msgs to Slack channels |
+| **telegram_receive** | `TelegramReceiveTool` | Receive msgs from Telegram chats |
+| **telegram_send** | `TelegramSendTool` | Send msgs to Telegram chats |
 | **jira_receive** | `JiraReceiveTool` | Fetch tasks/issues from Jira |
-| **jira_create** | `JiraCreateTool` | Create new issues in Jira |
+| **jira_create** | `JiraCreateTool` | mk new issues in Jira |
 | **analyze_tasks** | `AnalyzeTasksTool` | Analyze and prioritize tasks from messaging platforms |
 
-### Git Operations Tools
+### Git ops Tools
 
-| Tool | Class | Description |
-|------|-------|-------------|
-| **git_diff** | `GitDiffTool` | Check git diff between current branch and main/master branch |
-| **git_commit** | `GitCommitTool` | Create a git commit with specified message |
-| **git_push** | `GitPushTool` | Push git commits to remote repository |
-| **git_pull_request** | `GitPullRequestTool` | Create pull requests on GitHub or GitLab |
+| Tool | Class | desc |
+| **git_diff** | `GitDiffTool` | Check git diff between curr branch and main/master branch |
+| **git_commit** | `GitCommitTool` | mk a git commit w/ specified msg |
+| **git_push** | `GitPushTool` | Push git commits to remote repo |
+| **git_pull_request** | `GitPullRequestTool` | mk pull reqs on GitHub or GitLab |
 
-### Tool Security
+### Tool sec
 
-All file system and shell tools operate within a configured `workspace_root` directory to prevent unauthorized access to sensitive files outside the project scope. Process tools track spawned processes and allow for proper cleanup.
+All file sys and shell tools operate w/in a configured `workspace_root` dir to prevent unauthorized access to sensitive files outside the project scope. Process tools track spawned processes and allow for proper cleanup.
 
-### Tool Usage Examples
+### Tool Usage exs
 
-#### File Operations
-```python
+#### File ops
+```
 from coding_agent.tools import ReadFileTool, WriteFileTool, ListDirTool
 
 # Read a specific file
-tool = ReadFileTool()
-result = tool.execute(path="src/main.py")
+tool ReadFileTool()
+result tool.run(path"src/main.py")
 
 # Write a new file
-tool = WriteFileTool()
-result = tool.execute(path="test.py", content="print('Hello')")
+tool WriteFileTool()
+result tool.run(path"test.py", content"print('Hello')")
 
-# List directory with details
-tool = ListDirTool()
-result = tool.execute(path=".")
+# List dir w/ details
+tool ListDirTool()
+result tool.run(path".")
 ```
 
 #### Process Management
-```python
+```
 from coding_agent.tools import StartProcessTool, StopProcessTool
 
 # Start a long-running server
-tool = StartProcessTool()
-result = tool.execute(command="python -m http.server 8000")
+tool StartProcessTool()
+result tool.run(command"python -m http.server 8000")
 # Returns: {"pid": 12345, "status": "running"}
 
 # Stop the process later
-tool = StopProcessTool()
-result = tool.execute(pid=12345)
+tool StopProcessTool()
+result tool.run(pid12345)
 ```
 
 #### Browser Automation
-```python
+```
 from coding_agent.tools import BrowserNavigateTool, BrowserClickTool, BrowserScreenshotTool
 
 # Navigate to a website
-tool = BrowserNavigateTool()
-result = tool.execute(url="https://example.com")
+tool BrowserNavigateTool()
+result tool.run(url"https://ex.com")
 
 # Take a screenshot
-tool = BrowserScreenshotTool()
-result = tool.execute(path="screenshot.png")
+tool BrowserScreenshotTool()
+result tool.run(path"screenshot.png")
 
 # Click a button
-tool = BrowserClickTool()
-result = tool.execute(selector="#login-button")
+tool BrowserClickTool()
+result tool.run(selector"#login-button")
 ```
 
 #### Messaging Integration
-```python
+```
 from coding_agent.tools import SlackSendTool, TelegramSendTool, JiraCreateTool
 
-# Send a Slack message
-tool = SlackSendTool()
-result = tool.execute(
-    channel="#general",
-    text="Deployment complete! ✅"
+# Send a Slack msg
+tool SlackSendTool()
+result tool.run(
+ channel"#general",
+ text"Deployment complete! "
 )
 
-# Send a Telegram message
-tool = TelegramSendTool()
-result = tool.execute(
-    chat_id="123456789",
-    text="Alert: Server CPU usage above 90%"
+# Send a Telegram msg
+tool TelegramSendTool()
+result tool.run(
+ chat_id"123456789",
+ text"Alert: Server CPU usage above 90"
 )
 
-# Create a Jira issue
-tool = JiraCreateTool()
-result = tool.execute(
-    project="PROJ",
-    summary="Fix login bug",
-    description="Users unable to login with special characters in password",
-    issuetype="Bug",
-    priority="High"
+# mk a Jira issue
+tool JiraCreateTool()
+result tool.run(
+ project"PROJ",
+ summary"Fix login bug",
+ desc"Users unable to login w/ special characters in password",
+ issuetype"Bug",
+ priority"High"
 )
 ```
 
-#### Git Operations
-```python
+#### Git ops
+```
 from coding_agent.tools import GitDiffTool, GitCommitTool, GitPushTool, GitPullRequestTool
 
 # Check git diff against main/master branch
-tool = GitDiffTool()
-result = tool.execute()
-# Or specify base branch: result = tool.execute(base_branch="develop")
+tool GitDiffTool()
+result tool.run()
+# Or specify base branch: result tool.run(base_branch"develop")
 
-# Create a commit
-tool = GitCommitTool()
-result = tool.execute(message="feat: add new feature", all_files=True)
+# mk a commit
+tool GitCommitTool()
+result tool.run(msg"feat: add new feature", all_filesTrue)
 
 # Push to remote
-tool = GitPushTool()
-result = tool.execute(set_upstream=True)
-# Or specify remote and branch: result = tool.execute(remote="origin", branch="feature-branch")
+tool GitPushTool()
+result tool.run(set_upstreamTrue)
+# Or specify remote and branch: result tool.run(remote"origin", branch"feature-branch")
 
-# Create a pull request (requires gh CLI for GitHub or glab CLI for GitLab)
-tool = GitPullRequestTool()
-result = tool.execute(
-    title="Add new feature",
-    body="This PR adds the new feature described in issue #123",
-    draft=False
+# mk a pull req (requires gh CLI for GitHub or glab CLI for GitLab)
+tool GitPullRequestTool()
+result tool.run(
+ title"Add new feature",
+ body"This PR adds the new feature described in issue #123",
+ draftFalse
 )
 ```
 
@@ -768,91 +735,89 @@ result = tool.execute(
 
 All tools follow a consistent architecture:
 
-```python
+```
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, opt
 
 @dataclass
 class ToolResult:
-    """Standard result structure for all tools."""
-    success: bool
-    output: str = ""
-    error: Optional[str] = None
-    data: Optional[Any] = None
+ """Standard result structure for all tools."""
+ success: bool
+ output: str ""
+ error: opt[str] None
+ data: opt[Any] None
 
 class Tool(ABC):
-    """Base class for all tools."""
-    
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Unique tool identifier."""
-        pass
-    
-    @property
-    @abstractmethod
-    def description(self) -> str:
-        """Human-readable description for LLM."""
-        pass
-    
-    @property
-    @abstractmethod
-    def schema(self) -> dict:
-        """JSON Schema for tool parameters."""
-        pass
-    
-    @abstractmethod
-    def execute(self, **kwargs: Any) -> ToolResult:
-        """Execute the tool with given parameters."""
-        pass
+ """Base class for all tools."""
+
+ @property
+ @abstractmethod
+ def name(self) - str:
+ """Unique tool identifier."""
+ pass
+
+ @property
+ @abstractmethod
+ def desc(self) - str:
+ """Human-readable desc for LLM."""
+ pass
+
+ @property
+ @abstractmethod
+ def schema(self) - dict:
+ """JSON Schema for tool params."""
+ pass
+
+ @abstractmethod
+ def run(self, **kwargs: Any) - ToolResult:
+ """run the tool w/ given params."""
+ pass
 ```
 
-This consistent interface allows:
-- Easy registration with the agent
-- Automatic schema generation for LLM function calling
+This consistent iface allows:
+- Easy registration w/ the agent
+- auto schema gen for LLM func calling
 - Standardized error handling
 - Simple testing and mocking
 
----
-
-## ⚙️ Configuration
+## config
 
 ### Settings Class
 
-Configure agent behavior with the `Settings` class:
+Configure agent behavior w/ the `Settings` class:
 
-```python
+```
 from coding_agent.config import Settings
 
-settings = Settings(
-    workspace_dir=".",              # Root directory for file operations
-    max_iterations=50,              # Maximum agent loop iterations
-    timeout_seconds=300,            # Tool execution timeout (seconds)
-    log_level="INFO",               # Logging level: DEBUG, INFO, WARNING, ERROR
-    enable_history=True,            # Persist conversation history
-    history_dir=".agent_history",   # Directory for history storage
-    max_context_length=128000,      # Maximum context tokens
-    temperature=0.7,                # LLM temperature (creativity)
-    top_p=0.95,                     # LLM nucleus sampling parameter
+settings Settings(
+ workspace_dir".", # Root dir for file ops
+ max_iterations50, # max agent loop iterations
+ timeout_seconds300, # Tool exec timeout (seconds)
+ log_level"INFO", # Logging level: DEBUG, INFO, warn, ERROR
+ enable_historyTrue, # Persist conversation history
+ history_dir".agent_history", # dir for history storage
+ max_context_length128000, # max context tokens
+ temperature0.7, # LLM temperature (creativity)
+ top_p0.95, # LLM nucleus sampling parameter
 )
 ```
 
 ### ModelConfig Class
 
-Configure LLM connection parameters:
+Configure LLM connection params:
 
-```python
+```
 from coding_agent.config import ModelConfig
 
-model_config = ModelConfig(
-    base_url="http://localhost:11434/v1",  # API endpoint URL
-    api_key="ollama",                       # API key (use actual key for cloud APIs)
-    model_name="qwen2.5-coder:7b",          # Model identifier
-    max_tokens=4096,                        # Maximum response tokens
-    timeout=120,                            # Request timeout (seconds)
-    retry_count=3,                          # Number of retry attempts
-    stream=True,                            # Enable streaming responses
+model_config ModelConfig(
+ base_url"http://localhost:11434/v1", # API endpoint URL
+ api_key"ollama", # API key (use actual key for cloud APIs)
+ model_name"qwen2.5-coder:7b", # Model identifier
+ max_tokens4096, # max resp tokens
+ timeout120, # req timeout (seconds)
+ retry_count3, # num of retry attempts
+ streamTrue, # Enable streaming resps
 )
 ```
 
@@ -860,156 +825,148 @@ model_config = ModelConfig(
 
 You can also use cloud-based LLM providers:
 
-```python
+```
 # OpenAI GPT-4
-model_config = ModelConfig(
-    base_url="https://api.openai.com/v1",
-    api_key="your-openai-api-key",
-    model_name="gpt-4-turbo-preview",
+model_config ModelConfig(
+ base_url"https://api.openai.com/v1",
+ api_key"your-openai-api-key",
+ model_name"gpt-4-turbo-preview",
 )
 
 # Anthropic Claude (via OpenAI-compatible proxy)
-model_config = ModelConfig(
-    base_url="https://your-proxy.com/v1",
-    api_key="your-api-key",
-    model_name="claude-3-opus-20240229",
+model_config ModelConfig(
+ base_url"https://your-proxy.com/v1",
+ api_key"your-api-key",
+ model_name"claude-3-opus-20240229",
 )
 ```
 
----
+## Creating Custom Tools
 
-## 🔨 Creating Custom Tools
+Extend the agent w/ your own custom tools:
 
-Extend the agent with your own custom tools:
-
-```python
+```
 from typing import Any
 from coding_agent.tools import Tool, ToolResult
 
-
 class WeatherTool(Tool):
-    """Custom tool to fetch weather data."""
-    
-    @property
-    def name(self) -> str:
-        return "get_weather"
-    
-    @property
-    def description(self) -> str:
-        return "Get current weather for a specified city"
-    
-    @property
-    def schema(self) -> dict:
-        return {
-            "type": "object",
-            "properties": {
-                "city": {
-                    "type": "string", 
-                    "description": "Name of the city"
-                },
-                "unit": {
-                    "type": "string", 
-                    "description": "Temperature unit (celsius or fahrenheit)",
-                    "enum": ["celsius", "fahrenheit"]
-                }
-            },
-            "required": ["city"],
-        }
-    
-    def execute(self, **kwargs: Any) -> ToolResult:
-        """Execute the weather lookup."""
-        city = kwargs.get("city")
-        unit = kwargs.get("unit", "celsius")
-        
-        # Your implementation here
-        try:
-            # Simulated weather data
-            weather_data = f"Weather in {city}: 22°{unit[0].upper()}"
-            return ToolResult(success=True, output=weather_data)
-        except Exception as e:
-            return ToolResult(success=False, error=str(e))
+ """Custom tool to fetch weather data."""
 
+ @property
+ def name(self) - str:
+ return "get_weather"
+
+ @property
+ def desc(self) - str:
+ return "Get curr weather for a specified city"
+
+ @property
+ def schema(self) - dict:
+ return {
+ "type": "object",
+ "props": {
+ "city": {
+ "type": "string",
+ "desc": "Name of the city"
+ },
+ "unit": {
+ "type": "string",
+ "desc": "Temperature unit (celsius or fahrenheit)",
+ "enum": ["celsius", "fahrenheit"]
+ }
+ },
+ "req": ["city"],
+ }
+
+ def run(self, **kwargs: Any) - ToolResult:
+ """run the weather lookup."""
+ city kwargs.get("city")
+ unit kwargs.get("unit", "celsius")
+
+ # Your impl here
+ try:
+ # Simulated weather data
+ weather_data f"Weather in {city}: 22{unit[0].upper()}"
+ return ToolResult(successTrue, outputweather_data)
+ except Exception as e:
+ return ToolResult(successFalse, errorstr(e))
 
 # Register and use the custom tool
-with CodingAgent() as agent:
-    agent.register_tool(WeatherTool())
-    response = agent.run("What's the weather in London?")
-    print(response)
+w/ CodingAgent() as agent:
+ agent.register_tool(WeatherTool())
+ resp agent.run("What's the weather in London?")
+ print(resp)
 ```
 
 ### Tool Best Practices
 
 1. **Single Responsibility**: Each tool should do one thing well
-2. **Clear Descriptions**: Write detailed descriptions for the LLM
-3. **Proper Schemas**: Define clear JSON schemas for parameters
+2. **Clear Descriptions**: Write detailed descs for the LLM
+3. **Proper Schemas**: Define clear JSON schemas for params
 4. **Error Handling**: Always handle exceptions gracefully
-5. **Security**: Validate inputs and respect workspace boundaries
+5. **sec**: Validate inputs and respect workspace boundaries
 
-### Tool Development Workflow
+### Tool dev Workflow
 
 1. **Identify the Need**: Determine what capability is missing
-2. **Design the Interface**: Define clear inputs and outputs
-3. **Implement the Tool**: Extend the `Tool` base class
+2. **Design the iface**: Define clear inputs and outputs
+3. **impl the Tool**: Extend the `Tool` base class
 4. **Write Tests**: Ensure reliable behavior
-5. **Register and Test**: Add to agent and test with real scenarios
+5. **Register and Test**: Add to agent and test w/ real scenarios
 
-```python
-# Example: Testing a custom tool
+```
+# ex: Testing a custom tool
 import pytest
 from coding_agent.tools import ToolResult
 from your_module import YourCustomTool
 
 def test_your_tool():
-    tool = YourCustomTool()
-    result = tool.execute(param1="value1")
-    
-    assert isinstance(result, ToolResult)
-    assert result.success is True
-    assert "expected" in result.output
+ tool YourCustomTool()
+ result tool.run(param1"value1")
+
+ assert isinstance(result, ToolResult)
+ assert result.success is True
+ assert "expected" in result.output
 ```
 
----
+## Testing Your Tools
 
-## 🧪 Testing Your Tools
+The project includes complete tests for all built-in tools. When creating custom tools, follow similar testing patterns:
 
-The project includes comprehensive tests for all built-in tools. When creating custom tools, follow similar testing patterns:
-
-```python
+```
 # tests/test_custom_tools.py
 import pytest
 from coding_agent.tools import ToolResult
 from coding_agent.tools.browser import BrowserNavigateTool
 
 class TestBrowserTools:
-    def test_navigate_valid_url(self):
-        tool = BrowserNavigateTool()
-        result = tool.execute(url="https://example.com")
-        assert result.success is True
-        assert "navigated" in result.output.lower()
-    
-    def test_navigate_invalid_url(self):
-        tool = BrowserNavigateTool()
-        result = tool.execute(url="not-a-valid-url")
-        assert result.success is False
-        assert "error" in result.output.lower()
+ def test_navigate_valid_url(self):
+ tool BrowserNavigateTool()
+ result tool.run(url"https://ex.com")
+ assert result.success is True
+ assert "navigated" in result.output.lower()
+
+ def test_navigate_invalid_url(self):
+ tool BrowserNavigateTool()
+ result tool.run(url"not-a-valid-url")
+ assert result.success is False
+ assert "error" in result.output.lower()
 ```
 
-Run tests with pytest:
+Run tests w/ pytest:
 
-```bash
+```
 # Run all tests
 pytest tests/
 
 # Run specific test file
 pytest tests/test_custom_tools.py
 
-# Run with coverage
-pytest --cov=coding_agent tests/
+# Run w/ coverage
+pytest --covcoding_agent tests/
 ```
 
----
-
-## 🎨 Design Principles
+## Design Principles
 
 ### KISS (Keep It Simple, Stupid)
 
@@ -1020,35 +977,33 @@ pytest --cov=coding_agent tests/
 
 ### DRY (Don't Repeat Yourself)
 
-- Shared utilities in common modules
+- Shared utils in common mods
 - Centralized tool registry
-- Reusable message and configuration classes
+- Reusable msg and config classes
 - Consistent patterns across components
 
 ### Google Style Guide
 
-- Comprehensive docstrings with Args, Returns, Raises
+- complete docstrings w/ Args, Returns, Raises
 - Type hints throughout the codebase
 - Clear naming conventions
-- Well-organized module structure
+- Well-organized mod structure
 
-### Security First
+### sec 1st
 
-- Workspace isolation for file operations
-- Input validation on all tool parameters
-- Timeout limits on tool execution
-- Safe shell command execution
+- Workspace isolation for file ops
+- Input validation on all tool params
+- Timeout limits on tool exec
+- Safe shell command exec
 
----
+## reqs
 
-## 📦 Requirements
-
-### Core Dependencies
+### Core deps
 
 - **Python**: 3.10 or higher
 - **httpx**: Async HTTP client for LLM API calls
 
-### Optional Dependencies
+### opt deps
 
 - **Ollama**: For local LLM inference
 - **pytest**: For running tests
@@ -1057,30 +1012,25 @@ pytest --cov=coding_agent tests/
 
 ### Recommended Models
 
-| Model | Size | Performance | Use Case |
-|-------|------|-------------|----------|
+| Model | Size | perf | Use Case |
 | Qwen2.5-Coder-7B | 7B | Excellent | General coding tasks |
 | CodeLlama-7B | 7B | Very Good | Code completion |
 | DeepSeek-Coder-6.7B | 6.7B | Excellent | Multi-language support |
 | StarCoder2-7B | 7B | Very Good | Open-source alternative |
 
----
+## Testing
 
-## 🧪 Testing
+Run the included exs to verify your setup:
 
-Run the included examples to verify your setup:
-
-```bash
+```
 # Test basic functionality
-python -m coding_agent.examples.basic_usage
+python -m coding_agent.exs.basic_usage
 
 # Test custom tools
-python -m coding_agent.examples.custom_tools
+python -m coding_agent.exs.custom_tools
 ```
 
----
-
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the LICENSE file for details.
 
@@ -1091,51 +1041,45 @@ Copyright (c) 2024 Coding Agent Project
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
+in the Software w/o restriction, incl w/o limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+furnished to do so, subject to the follow conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+THE SOFTWARE IS PROVIDED "AS IS", w/o WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, incl BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A specific PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+OUT OF OR IN CONNECTION w/ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
----
+## Contributing
 
-## 🤝 Contributing
+Contributions are welcome! plz follow these guidelines:
 
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch
+1. Fork the repo
+2. mk a feature branch
 3. Make your changes
 4. Add tests if applicable
-5. Submit a pull request
+5. Submit a pull req
 
----
-
-## 📞 Support
+## Support
 
 For issues, questions, or suggestions:
 
-- 📖 Check the documentation in `/workspace/coding_agent/README.md`
-- 🐛 Report bugs via issue tracker
-- 💬 Discuss features and improvements
+- Check the documentation in `/workspace/coding_agent/README.md`
+- Report bugs via issue tracker
+- Discuss features and improvements
 
----
+div align"center"
 
-<div align="center">
+**Happy Coding! **
 
-**Happy Coding! 🚀**
+Built w/ using local LLMs
 
-Built with ❤️ using local LLMs
-
-</div>
+/div

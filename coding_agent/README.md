@@ -1,36 +1,36 @@
 # Coding Agent
 
-A modular and scalable coding agent architecture designed for on-device execution with local LLM models.
+A modular and scale coding agent architecture designed for on-device exec w/ local LLM models.
 
 ## Features
 
-- **OpenAI-Compatible API**: Works with local models like Qwen2.5-Coder via Ollama or any OpenAI-compatible endpoint
-- **Modular Tool System**: Easy to extend with custom tools
-- **ReAct Pattern**: Reasoning + Acting loop for complex task completion
-- **Conversation History**: Persistent context across sessions
-- **Google Style Guide**: Clean, well-documented code following best practices
-- **KISS & DRY**: Simple, maintainable architecture
+- **OpenAI-Compatible API**: Works w/ local models like Qwen2.5-Coder via Ollama or any OpenAI-compatible endpoint
+- **Modular Tool sys**: Easy to extend w/ custom tools
+- **ReAct Pattern**: Reasoning Acting loop for complex task completion
+- **Conversation History**: persist context across sessions
+- **Google Style Guide**: Clean, well-documented code follow best practices
+- **KISS DRY**: Simple, maintainable architecture
 
 ## Architecture
 
 ```
 coding_agent/
-├── config/          # Configuration classes (Settings, ModelConfig)
-├── core/            # Core agent logic (CodingAgent, ConversationContext)
-├── llm/             # LLM client (OpenAI-compatible)
-├── tools/           # Tool definitions and implementations
-├── utils/           # Utility functions
-└── examples/        # Usage examples
+ config/ # config classes (Settings, ModelConfig)
+ core/ # Core agent logic (CodingAgent, ConversationContext)
+ llm/ # LLM client (OpenAI-compatible)
+ tools/ # Tool definitions and implementations
+ utils/ # Utility funcs
+ exs/ # Usage exs
 ```
 
-## Installation
+## install
 
-```bash
-# Install dependencies
+```
+# Install deps
 pip install httpx
 
-# For development
-pip install -r requirements-dev.txt
+# For dev
+pip install -r reqs-dev.txt
 ```
 
 ## Quick Start
@@ -39,118 +39,117 @@ pip install -r requirements-dev.txt
 
 Install [Ollama](https://ollama.ai/) and pull a coding model:
 
-```bash
+```
 ollama pull qwen2.5-coder:7b
 ```
 
 ### 2. Basic Usage
 
-```python
+```
 from coding_agent.config import ModelConfig, Settings
 from coding_agent.core import CodingAgent
 from coding_agent.tools import ReadFileTool, WriteFileTool, ListDirTool
 from coding_agent.utils import setup_logging
 
-setup_logging(level="INFO")
+setup_logging(level"INFO")
 
-settings = Settings(workspace_dir=".")
-model_config = ModelConfig(
-    base_url="http://localhost:11434/v1",
-    model_name="qwen2.5-coder:7b",
+settings Settings(workspace_dir".")
+model_config ModelConfig(
+ base_url"http://localhost:11434/v1",
+ model_name"qwen2.5-coder:7b",
 )
 
-with CodingAgent(settings=settings, model_config=model_config) as agent:
-    # Register tools
-    agent.register_tool(ReadFileTool())
-    agent.register_tool(WriteFileTool())
-    agent.register_tool(ListDirTool())
+w/ CodingAgent(settingssettings, model_configmodel_config) as agent:
+ # Register tools
+ agent.register_tool(ReadFileTool())
+ agent.register_tool(WriteFileTool())
+ agent.register_tool(ListDirTool())
 
-    # Run agent
-    response = agent.run("List all Python files in the current directory")
-    print(response)
+ # Run agent
+ resp agent.run("List all Python files in the curr dir")
+ print(resp)
 ```
 
-### 3. Run Example
+### 3. Run ex
 
-```bash
-python -m coding_agent.examples.basic_usage
+```
+python -m coding_agent.exs.basic_usage
 ```
 
 ## Creating Custom Tools
 
-```python
+```
 from typing import Any
 from coding_agent.tools import Tool, ToolResult
 
 class MyCustomTool(Tool):
-    @property
-    def name(self) -> str:
-        return "my_tool"
+ @property
+ def name(self) - str:
+ return "my_tool"
 
-    @property
-    def description(self) -> str:
-        return "Description of what this tool does"
+ @property
+ def desc(self) - str:
+ return "desc of what this tool does"
 
-    @property
-    def schema(self) -> dict:
-        return {
-            "type": "object",
-            "properties": {
-                "param1": {"type": "string", "description": "Parameter description"},
-            },
-            "required": ["param1"],
-        }
+ @property
+ def schema(self) - dict:
+ return {
+ "type": "object",
+ "props": {
+ "param1": {"type": "string", "desc": "Parameter desc"},
+ },
+ "req": ["param1"],
+ }
 
-    def execute(self, **kwargs: Any) -> ToolResult:
-        param1 = kwargs.get("param1")
-        # Your implementation here
-        return ToolResult(success=True, output="Result")
+ def run(self, **kwargs: Any) - ToolResult:
+ param1 kwargs.get("param1")
+ # Your impl here
+ return ToolResult(successTrue, output"Result")
 ```
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
+| Tool | desc |
 | `read_file` | Read contents of a file |
 | `write_file` | Write content to a file |
-| `list_dir` | List directory contents |
+| `list_dir` | List dir contents |
 | `search_files` | Search files by glob pattern |
-| `run_command` | Execute shell commands |
-| `run_python` | Execute Python code snippets |
+| `run_command` | run shell commands |
+| `run_python` | run Python code snippets |
 | `git_diff` | Check git diff against main/master branch |
-| `git_commit` | Create a git commit with specified message |
-| `git_push` | Push git commits to remote repository |
-| `git_pull_request` | Create pull requests on GitHub or GitLab |
+| `git_commit` | mk a git commit w/ specified msg |
+| `git_push` | Push git commits to remote repo |
+| `git_pull_request` | mk pull reqs on GitHub or GitLab |
 
-## Configuration
+## config
 
 ### Settings
 
-```python
+```
 Settings(
-    workspace_dir=".",           # Root directory for operations
-    max_iterations=50,           # Maximum agent loop iterations
-    timeout_seconds=300,         # Tool execution timeout
-    log_level="INFO",            # Logging level
-    enable_history=True,         # Persist conversation history
-    history_dir=".agent_history",# History storage directory
-    max_context_length=128000,   # Max context tokens
-    temperature=0.7,             # LLM temperature
-    top_p=0.95,                  # LLM top_p
+ workspace_dir".", # Root dir for ops
+ max_iterations50, # max agent loop iterations
+ timeout_seconds300, # Tool exec timeout
+ log_level"INFO", # Logging level
+ enable_historyTrue, # Persist conversation history
+ history_dir".agent_history",# History storage dir
+ max_context_length128000, # Max context tokens
+ temperature0.7, # LLM temperature
+ top_p0.95, # LLM top_p
 )
 ```
 
 ### ModelConfig
 
-```python
+```
 ModelConfig(
-    base_url="http://localhost:11434/v1",  # API endpoint
-    api_key="ollama",                       # API key (dummy for local)
-    model_name="qwen2.5-coder:7b",          # Model name
-    max_tokens=4096,                        # Max response tokens
-    timeout=120,                            # Request timeout
-    retry_count=3,                          # Retry attempts
-    stream=True,                            // Stream responses
+ base_url"http://localhost:11434/v1", # API endpoint
+ api_key"ollama", # API key (dummy for local)
+ model_name"qwen2.5-coder:7b", # Model name
+ max_tokens4096, # Max resp tokens
+ timeout120, # req timeout
+ retry_count3, # Retry attempts
+ streamTrue, // Stream resps
 )
 ```
 
@@ -162,12 +161,12 @@ ModelConfig(
 - Straightforward control flow
 
 ### DRY (Don't Repeat Yourself)
-- Shared utilities in common modules
+- Shared utils in common mods
 - Centralized tool registry
-- Reusable message and configuration classes
+- Reusable msg and config classes
 
 ### Google Style Guide
-- Comprehensive docstrings
+- complete docstrings
 - Type hints throughout
 - Clear naming conventions
 

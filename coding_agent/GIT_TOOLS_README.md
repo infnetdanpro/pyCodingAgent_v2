@@ -1,223 +1,223 @@
-# Git Operations Tools
+# Git ops Tools
 
-This document describes the Git operations tools available in the Coding Agent.
+This document describes the Git ops tools available in the Coding Agent.
 
 ## Overview
 
-The Git tools provide a comprehensive set of capabilities for version control operations, including:
+The Git tools provide a complete set of caps for ver control ops, incl:
 
 - Checking differences between branches
 - Creating commits
-- Pushing changes to remote repositories
-- Creating pull requests on GitHub or GitLab
+- Pushing changes to remote repos
+- Creating pull reqs on GitHub or GitLab
 
 ## Available Tools
 
 ### 1. GitDiffTool (`git_diff`)
 
-Check git diff between current branch and main/master branch.
+Check git diff between curr branch and main/master branch.
 
-**Description:** Shows all changes made in the current branch compared to the base branch. Automatically detects whether to use 'main' or 'master' as the base branch.
+**desc:** Shows all changes made in the curr branch compared to the base branch. auto detects whether to use 'main' or 'master' as the base branch.
 
-**Parameters:**
-- `base_branch` (string, optional): Base branch to compare against. Auto-detects main/master if not specified.
-- `cached` (boolean, optional): Whether to show staged changes only. Default: false.
+**params:**
+- `base_branch` (string, opt): Base branch to compare against. Auto-detects main/master if not specified.
+- `cached` (boolean, opt): Whether to show staged changes only. def: false.
 
-**Example Usage:**
-```python
+**ex Usage:**
+```
 from coding_agent.tools import GitDiffTool
 
 # Basic usage - auto-detects main/master
-tool = GitDiffTool()
-result = tool.execute()
+tool GitDiffTool()
+result tool.run()
 
 # Specify base branch
-result = tool.execute(base_branch="develop")
+result tool.run(base_branch"develop")
 
 # Show only staged changes
-result = tool.execute(cached=True)
+result tool.run(cachedTrue)
 ```
 
 ### 2. GitCommitTool (`git_commit`)
 
-Create a git commit with the specified message.
+mk a git commit w/ the specified msg.
 
-**Description:** Creates a git commit with support for conventional commit format. Optionally stages all changes before committing.
+**desc:** Creates a git commit w/ support for conventional commit format. Optionally stages all changes b4 committing.
 
-**Parameters:**
-- `message` (string, required): Commit message.
-- `all_files` (boolean, optional): Whether to stage all changed files before committing. Default: false.
+**params:**
+- `msg` (string, req): Commit msg.
+- `all_files` (boolean, opt): Whether to stage all changed files b4 committing. def: false.
 
-**Example Usage:**
-```python
+**ex Usage:**
+```
 from coding_agent.tools import GitCommitTool
 
-# Create a simple commit
-tool = GitCommitTool()
-result = tool.execute(message="feat: add new feature")
+# mk a simple commit
+tool GitCommitTool()
+result tool.run(msg"feat: add new feature")
 
 # Stage all files and commit
-result = tool.execute(message="fix: resolve bug in authentication", all_files=True)
+result tool.run(msg"fix: resolve bug in auth", all_filesTrue)
 ```
 
 ### 3. GitPushTool (`git_push`)
 
-Push git commits to remote repository.
+Push git commits to remote repo.
 
-**Description:** Pushes git commits to remote repository with support for setting upstream for new branches.
+**desc:** Pushes git commits to remote repo w/ support for setting upstream for new branches.
 
-**Parameters:**
-- `remote` (string, optional): Remote name. Default: "origin".
-- `branch` (string, optional): Branch name to push. Default: current branch.
-- `set_upstream` (boolean, optional): Whether to set upstream. Default: false.
+**params:**
+- `remote` (string, opt): Remote name. def: "origin".
+- `branch` (string, opt): Branch name to push. def: curr branch.
+- `set_upstream` (boolean, opt): Whether to set upstream. def: false.
 
-**Example Usage:**
-```python
+**ex Usage:**
+```
 from coding_agent.tools import GitPushTool
 
-# Push to origin with current branch
-tool = GitPushTool()
-result = tool.execute()
+# Push to origin w/ curr branch
+tool GitPushTool()
+result tool.run()
 
-# Push with upstream
-result = tool.execute(set_upstream=True)
+# Push w/ upstream
+result tool.run(set_upstreamTrue)
 
 # Specify remote and branch
-result = tool.execute(remote="upstream", branch="feature-branch")
+result tool.run(remote"upstream", branch"feature-branch")
 ```
 
 ### 4. GitPullRequestTool (`git_pull_request`)
 
-Create a pull request on GitHub or GitLab.
+mk a pull req on GitHub or GitLab.
 
-**Description:** Creates a pull request on GitHub (using `gh` CLI) or GitLab (using `glab` CLI). Requires the appropriate CLI tool to be installed and authenticated.
+**desc:** Creates a pull req on GitHub (using `gh` CLI) or GitLab (using `glab` CLI). Requires the appropriate CLI tool to be installed and authenticated.
 
-**Parameters:**
-- `title` (string, required): Pull request title.
-- `body` (string, optional): Pull request description/body.
-- `base` (string, optional): Base branch to merge into. Default: main or master.
-- `head` (string, optional): Head branch to merge from. Default: current branch.
-- `draft` (boolean, optional): Whether to create as draft PR. Default: false.
-- `platform` (string, optional): Git platform: 'github', 'gitlab', or 'auto'. Default: 'auto'.
+**params:**
+- `title` (string, req): Pull req title.
+- `body` (string, opt): Pull req desc/body.
+- `base` (string, opt): Base branch to merge into. def: main or master.
+- `head` (string, opt): Head branch to merge from. def: curr branch.
+- `draft` (boolean, opt): Whether to mk as draft PR. def: false.
+- `platform` (string, opt): Git platform: 'github', 'gitlab', or 'auto'. def: 'auto'.
 
 **Prerequisites:**
-- For GitHub: Install [GitHub CLI](https://cli.github.com/) and authenticate with `gh auth login`
-- For GitLab: Install [GitLab CLI](https://gitlab.com/gitlab-org/cli) and authenticate with `glab auth login`
+- For GitHub: Install [GitHub CLI](https://cli.github.com/) and authenticate w/ `gh auth login`
+- For GitLab: Install [GitLab CLI](https://gitlab.com/gitlab-org/cli) and authenticate w/ `glab auth login`
 
-**Example Usage:**
-```python
+**ex Usage:**
+```
 from coding_agent.tools import GitPullRequestTool
 
-# Create a basic PR (auto-detects platform)
-tool = GitPullRequestTool()
-result = tool.execute(
-    title="Add new feature",
-    body="This PR adds the new feature described in issue #123"
+# mk a basic PR (auto-detects platform)
+tool GitPullRequestTool()
+result tool.run(
+ title"Add new feature",
+ body"This PR adds the new feature described in issue #123"
 )
 
-# Create a draft PR on GitHub
-result = tool.execute(
-    title="WIP: New authentication system",
-    body="Work in progress - do not merge yet",
-    draft=True,
-    platform="github"
+# mk a draft PR on GitHub
+result tool.run(
+ title"WIP: New auth sys",
+ body"Work in progress - do not merge yet",
+ draftTrue,
+ platform"github"
 )
 
 # Specify base and head branches
-result = tool.execute(
-    title="Merge feature into develop",
-    base="develop",
-    head="feature/new-auth"
+result tool.run(
+ title"Merge feature into develop",
+ base"develop",
+ head"feature/new-auth"
 )
 ```
 
-## Installation Requirements
+## install reqs
 
 For full Git functionality, ensure you have:
 
 1. **Git** installed and configured
-2. **GitHub CLI** (for GitHub PRs): 
-   ```bash
-   # Install gh CLI
-   brew install gh  # macOS
-   sudo apt install gh  # Linux
-   
-   # Authenticate
-   gh auth login
-   ```
+2. **GitHub CLI** (for GitHub PRs):
+ ```
+ # Install gh CLI
+ brew install gh # macOS
+ sudo apt install gh # Linux
+
+ # Authenticate
+ gh auth login
+ ```
 
 3. **GitLab CLI** (for GitLab MRs):
-   ```bash
-   # Install glab CLI
-   brew install glab  # macOS
-   sudo apt install glab  # Linux
-   
-   # Authenticate
-   glab auth login
-   ```
+ ```
+ # Install glab CLI
+ brew install glab # macOS
+ sudo apt install glab # Linux
 
-## Security Considerations
+ # Authenticate
+ glab auth login
+ ```
 
-All Git operations are executed within the configured `workspace_root` directory to prevent unauthorized access to repositories outside the project scope. The tools use subprocess with `shell=False` to prevent shell injection vulnerabilities.
+## sec Considerations
+
+All Git ops are executed w/in the configured `workspace_root` dir to prevent unauthorized access to repos outside the project scope. The tools use subprocess w/ `shellFalse` to prevent shell injection vulnerabilities.
 
 ## Error Handling
 
-All Git tools return a `ToolResult` object with:
+All Git tools return a `ToolResult` object w/:
 - `success`: Boolean indicating if the operation succeeded
 - `output`: String containing the command output
-- `error`: Optional error message if execution failed
+- `error`: opt error msg if exec failed
 
-Example error handling:
-```python
+ex error handling:
+```
 from coding_agent.tools import GitCommitTool
 
-tool = GitCommitTool()
-result = tool.execute(message="feat: add feature")
+tool GitCommitTool()
+result tool.run(msg"feat: add feature")
 
 if result.success:
-    print(f"Commit successful: {result.output}")
+ print(f"Commit successful: {result.output}")
 else:
-    print(f"Commit failed: {result.error}")
+ print(f"Commit failed: {result.error}")
 ```
 
-## Integration with LLM
+## Integration w/ LLM
 
-These tools are automatically available to the LLM when registered with the agent's tool registry. The LLM can use them to:
+These tools are auto available to the LLM when registered w/ the agent's tool registry. The LLM can use them to:
 
 1. Check what changes have been made (`git_diff`)
 2. Commit changes after completing tasks (`git_commit`)
 3. Push commits to remote (`git_push`)
-4. Create pull requests for code review (`git_pull_request`)
+4. mk pull reqs for code review (`git_pull_request`)
 
-Example LLM workflow:
-```python
+ex LLM workflow:
+```
 from coding_agent.core import CodingAgent
 from coding_agent.tools import GitDiffTool, GitCommitTool, GitPushTool
 
-agent = CodingAgent(...)
+agent CodingAgent(...)
 agent.register_tool(GitDiffTool())
 agent.register_tool(GitCommitTool())
 agent.register_tool(GitPushTool())
 
 # LLM can now use these tools autonomously
-response = agent.run("Check what changes I've made, commit them, and push to remote")
+resp agent.run("Check what changes I've made, commit them, and push to remote")
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **"Git command failed"** - Ensure you're in a valid Git repository
+1. **"Git command failed"** - Ensure you're in a valid Git repo
 2. **"gh CLI not found"** - Install GitHub CLI from https://cli.github.com/
 3. **"glab CLI not found"** - Install GitLab CLI from https://gitlab.com/gitlab-org/cli
-4. **"Authentication failed"** - Run `gh auth login` or `glab auth login`
-5. **"No remote configured"** - Add a remote with `git remote add origin <url>`
+4. **"auth failed"** - Run `gh auth login` or `glab auth login`
+5. **"No remote configured"** - Add a remote w/ `git remote add origin url`
 
 ### Debugging Tips
 
 Enable verbose output by checking the raw output:
-```python
-result = tool.execute(...)
+```
+result tool.run(...)
 print(f"Output: {result.output}")
 print(f"Error: {result.error}")
 ```
