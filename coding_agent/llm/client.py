@@ -80,7 +80,26 @@ class LLMClient:
                 logger.info(f"LLM response received successfully")
                 logger.debug(f"Response content length: {len(result[0])}, tool_calls: {len(result[1]) if result[1] else 0}")
                 return result
+            except httpx.HTTPStatusError as e:
+                # Capture detailed error information for debugging
+                error_detail = f"HTTP {e.response.status_code} {e.response.reason_phrase}"
+                try:
+                    error_body = e.response.json()
+                    error_detail += f"\nResponse body: {json.dumps(error_body, indent=2)}"
+                except Exception:
+                    error_detail += f"\nResponse body: {e.response.text}"
+                
+                # Log full request payload for debugging on error
+                logger.error(f"Request payload that caused error:\n{json.dumps(payload, indent=2)}")
+                
+                if attempt == self.config.retry_count:
+                    logger.error(f"LLM request failed after {attempt + 1} attempts: {error_detail}")
+                    raise RuntimeError(f"Step: {messages[-1].content[:50] if messages else 'Unknown'}\nResponse: Error: Failed to communicate with LLM - {error_detail}") from e
+                logger.warning(f"LLM request failed, retrying ({attempt + 1}): {error_detail}")
             except httpx.HTTPError as e:
+                # Log full request payload for debugging on error
+                logger.error(f"Request payload that caused error:\n{json.dumps(payload, indent=2)}")
+                
                 if attempt == self.config.retry_count:
                     logger.error(f"LLM request failed after {attempt + 1} attempts: {e}")
                     raise
