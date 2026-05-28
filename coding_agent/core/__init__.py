@@ -27,6 +27,10 @@ from .session_context import (
     read_requirements,
     get_python_coding_rules,
 )
+from .skills_loader import (
+    SkillsLoader,
+    load_skills_context,
+)
 
 __all__ = [
     "CodingAgent",
@@ -52,4 +56,6 @@ __all__ = [
     "get_pip_freeze",
     "read_requirements",
     "get_python_coding_rules",
+    "SkillsLoader",
+    "load_skills_context",
 ]

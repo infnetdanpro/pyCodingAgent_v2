@@ -52,12 +52,18 @@ class CodingAgent:
         session_context_str = None
         if prepare_context:
             from .session_context import prepare_session_context
+            from .skills_loader import load_skills_context
 
             session_ctx = prepare_session_context(
                 workspace_dir=self.settings.workspace_dir,
                 requirements_file="requirements.txt",
             )
             session_context_str = session_ctx.to_system_prompt()
+            
+            # Load skills/rules from Markdown files and append to session context
+            skills_context = load_skills_context(workspace_dir=self.settings.workspace_dir)
+            if skills_context:
+                session_context_str = session_context_str + "\n\n" + skills_context
 
         self._client = LLMClient(self.model_config)
         self._context = ConversationContext(
