@@ -1,26 +1,26 @@
 # Skills and Rules
 
-This directory contains skills and rules that the coding agent will load and use as context when assisting with development tasks.
+This dir contains skills and rules that the coding agent will load and use as context when assisting w/ dev tasks.
 
 ## How to Add Skills/Rules
 
-1. Create a new Markdown file (`.md`) in this directory or in the `rules/` or `.agent/` directories
+1. mk a new Markdown file (`.md`) in this dir or in the `rules/` or `.agent/` dirs
 2. Write your guidelines, best practices, or rules in Markdown format
-3. The agent will automatically load these files on startup
+3. The agent will auto load these files on startup
 
-## Supported Directories
+## Supported dirs
 
 The agent scans for skill/rule files in:
 - `skills/` - General skills and best practices
-- `rules/` - Project-specific rules and conventions  
-- `.agent/` - Agent-specific configuration and rules
+- `rules/` - Project-specific rules and conventions
+- `.agent/` - Agent-specific config and rules
 
-## Example Files
+## ex Files
 
 - `python_best_practices.md` - Python coding standards
-- `security_rules.md` - Security guidelines
+- `security_rules.md` - sec guidelines
 - `api_conventions.md` - API design patterns
 
 ## File Naming
 
-Files with keywords like "skill", "rule", "guide", "standard", "practice", or "convention" in their names will be automatically detected.
+Files w/ keywords like "skill", "rule", "guide", "standard", "practice", or "convention" in their names will be auto detected.
