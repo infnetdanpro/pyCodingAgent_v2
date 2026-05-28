@@ -17,6 +17,16 @@ from .vulnerability_remediator import (
     RemediationPlan,
     RemediationPlanItem,
 )
+from .session_context import (
+    SessionContext,
+    prepare_session_context,
+    get_file_list,
+    get_os_info,
+    get_datetime_info,
+    get_pip_freeze,
+    read_requirements,
+    get_python_coding_rules,
+)
 
 __all__ = [
     "CodingAgent",
@@ -34,4 +44,12 @@ __all__ = [
     "VulnerabilityFinding",
     "RemediationPlan",
     "RemediationPlanItem",
+    "SessionContext",
+    "prepare_session_context",
+    "get_file_list",
+    "get_os_info",
+    "get_datetime_info",
+    "get_pip_freeze",
+    "read_requirements",
+    "get_python_coding_rules",
 ]
