@@ -83,16 +83,10 @@ class RunCommandTool(Tool):
             if not command:
                 return ToolResult(success=False, error="Missing required parameter: command")
 
-            # Split command into arguments to avoid shell injection
-            import shlex
-            try:
-                command_args = shlex.split(command)
-            except ValueError:
-                return ToolResult(success=False, error="Invalid command syntax")
-
+            # Execute command in a shell to support shell features like cd, &&, ||, etc.
             result = subprocess.run(
-                command_args,
-                shell=False,
+                command,
+                shell=True,
                 cwd=self._shell_tools.workspace_root,
                 capture_output=True,
                 text=True,
