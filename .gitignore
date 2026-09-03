@@ -1,1 +1,22 @@
-Nothing needs to be added to .gitignore since the changes only include markdown documentation files (.md) which are source files and not build artifacts, dependencies, or temporary files.
+# Examples and skills documentation
+examples/
+skills/
+
+# Local configuration and temporary files
+*.local
+*.tmp
+*.temp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
