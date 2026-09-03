@@ -1,38 +1,9 @@
 ```
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.py.class
-*.pyc.class
-*.py~*
-*.py.bak
-*.py.swp
-*.py.swo
-*.py.log
-*.py.tmp
-*.py.zip
-*.py.tar
-*.py.gz
-*.py.bz2
-*.py.xz
-*.py.zst
-*.py.lz4
-*.py.lzh
-*.py.cab
-*.py.arj
-*.py.rpm
-*.py.deb
-*.py.Z
-*.py.lz
-*.py.lzo
-*.py.tar.gz
-*.py.tar.bz2
-*.py.tar.xz
-*.py.tar.zst
-
-# Distribution / packaging
+*.py[cod]
+*$py.class
+*.so
 .Python
 build/
 develop-eggs/
@@ -49,26 +20,23 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# IDEs
+# Environment
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
 .vscode/
 .idea/
-
-# Environment variables
-.env
-.env.local
-.env.*
+*.swp
+*.swo
 
 # Logs
 *.log
 
-# Temporary files
-*.tmp
-*.swp
-*.swo
-
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 ```
