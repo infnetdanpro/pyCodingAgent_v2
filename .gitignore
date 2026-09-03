@@ -22,22 +22,10 @@ wheels/
 *.egg
 
 # Environment
-.env
-.env.local
-.env.*
-
-# Logs
-*.log
-
-# Testing
-.coverage
-htmlcov/
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
+.venv/
+venv/
+env/
+ENV/
 
 # IDE
 .vscode/
@@ -46,7 +34,15 @@ coverage.xml
 *.swo
 *.tmp
 
-# OS
-.DS_Store
-Thumbs.db
+# Logs
+*.log
+
+# Coverage
+.coverage
+coverage/
+htmlcov/
+
+# Testing
+.pytest_cache/
+.mypy_cache/
 ```
