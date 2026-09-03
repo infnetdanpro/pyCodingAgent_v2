@@ -4,27 +4,71 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.py.class
+*.pyc.class
+*.py~*
+*.py.bak
+*.py.swp
+*.py.swo
+*.py.log
+*.py.tmp
+*.py.zip
+*.py.tar
+*.py.gz
+*.py.bz2
+*.py.xz
+*.py.zst
+*.py.lz4
+*.py.lzh
+*.py.cab
+*.py.arj
+*.py.rpm
+*.py.deb
+*.py.Z
+*.py.lz
+*.py.lzo
+*.py.tar.gz
+*.py.tar.bz2
+*.py.tar.xz
+*.py.tar.zst
 
-# Logs and temp files
-*.log
-*.tmp
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
+# IDEs
 .vscode/
 .idea/
 
-# Dependencies
-.venv/
-venv/
-node_modules/
+# Environment variables
+.env
+.env.local
+.env.*
 
-# Build artifacts
-dist/
-build/
-target/
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
